@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jamal Charkie · Engineering Portfolio</title>
+<meta name="description" content="Mechanical engineering student at DTU. A robot arm, a syringe pump, a cycloidal actuator and a wall-mounted QR scanner: designed, built and tested.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#193747">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="js/ares-scene.js"></script><script type="module" src="js/qdd-scene.js"></script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <span class="label kicker">Engineering portfolio</span>
+      <h1>Jamal Charkie</h1>
+      <p class="role">Mechanical engineering student (BEng) at DTU, focused on mechanical design and mechatronics.</p>
+      <p class="pitch">I like taking an idea all the way: <b>calculating it, designing it in SolidWorks and building a prototype</b> that gets tested and used. Looking for an engineering internship from February 2027, and a student job alongside my studies.</p>
+      <div class="cta">
+        <a class="btn primary" href="mailto:charkiejamal558@gmail.com">Email me</a>
+        <a class="btn" href="https://www.linkedin.com/in/jamalcharkie">LinkedIn</a>
+        <a class="btn" href="https://github.com/Jamalch15">GitHub</a>
+        <a class="btn" href="portfolio.pdf">PDF version</a>
+      </div>
+    </div>
+    <div class="hero-art" data-parallax>
+      <img class="art-ares" src="assets/hero-ares.webp" width="586" height="647" alt="SolidWorks render of the ARES-4 robot arm on its sorting table, with the overhead camera mast">
+      <img class="art-sec" src="assets/hero-section.webp" width="542" height="404" alt="Section through the cycloidal actuator: two discs, eccentric hub, input hub, bearings and housing">
+      <span class="tag t1">01 · ARES-4 robot arm</span>
+      <span class="tag t2">02 · Cycloidal actuator, section</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <nav class="index wrap" aria-label="Projects">
+    <div class="index-head">
+      <span class="label" style="color:var(--bar)">Selected projects</span>
+      <p>Four builds I picked to show the range, from mechanism design to electronics and software. They're a selection, not the full list; honorable mentions follow at the end.</p>
+    </div>
+    <ol>
+      <li><a href="#ares-4"><span class="thumb" style="background-image:url(assets/ares4-arm.jpg)"></span><span class="txt"><span class="label n">01 · DTU</span><span class="t">ARES-4 modular 4DOF robot arm</span><span class="res"><b>48 / 50</b> bricks sorted in the final test</span></span></a></li>
+      <li><a href="#cycloidal"><span class="thumb light" style="background-image:url(assets/qdd-thumb.jpg)"></span><span class="txt"><span class="label n">02 · Independent</span><span class="t">Cycloidal QDD actuator</span><span class="res"><b>15 : 1</b> two-disc reduction</span></span></a></li>
+      <li><a href="#qr-scanner"><span class="thumb light" style="background-image:url(assets/qr-v1-cad.jpg)"></span><span class="txt"><span class="label n">03 · Association</span><span class="t">Wall-mounted QR scanner</span><span class="res"><b>V2</b> in use every week</span></span></a></li>
+      <li><a href="#syringe-pump"><span class="thumb" style="background-image:url(assets/pump-prototype.jpg)"></span><span class="txt"><span class="label n">04 · DTU</span><span class="t">Motor-driven syringe pump</span><span class="res"><b>99–101 %</b> of the set flow</span></span></a></li>
+    </ol>
+  </nav>
+
+  <!-- 01 ARES-4 -->
+  <section class="project dark" id="ares-4" style="margin-top:56px">
+    <div class="wrap">
+      <div class="project-head">
+        <span class="num">01</span>
+        <h2>ARES-4: Modular 4DOF Robot Arm</h2>
+        <div class="meta">
+          <span class="chip status done">Completed</span>
+          <span class="ctx">DTU · team of 3</span>
+        </div>
+      </div>
+      <p class="lede"><b>A modular robot arm, built for many tasks.</b> Tools swap in seconds, and a browser dashboard lets you set up and run new jobs. We put it to the test on fully automatic LEGO sorting: <b>48 of 50 bricks</b> sorted.</p>
+      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks · Maple</dd></div><div><dt>Electronics</dt><dd>KiCad · ESP32-S3</dd></div><div><dt>Software</dt><dd>Python · FastAPI · camera vision</dd></div></dl>
+
+      <div class="ares3d" data-ares3d>
+        <div class="ares3d-stage">
+          <canvas aria-label="Interactive 3D model of ARES-4, rebuilt from the SolidWorks assembly"></canvas>
+          <div class="ares3d-labels" aria-hidden="true"></div>
+          <div class="ares3d-dots" aria-label="Steps"></div>
+          <span class="ares3d-note">3D model from the original SolidWorks assembly · scroll, or drag to orbit</span>
+        </div>
+        <div class="ares3d-steps">
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">01</span><span class="label">ARES-4</span><h3>One arm, many jobs</h3><p>A four-joint arm with <b>tools that swap in seconds</b> and <b>software that sets up new tasks</b>. Here it sorts LEGO bricks, fully on its own.</p><dl class="step-meta"><div><dt>4</dt><dd>joints</dd></div><div><dt>≈500 mm</dt><dd>reach</dd></div><div><dt>≈500 g</dt><dd>payload</dd></div></dl></div></div>
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">02</span><span class="label">Base and shoulder</span><h3>Strong enough at full reach</h3><p>Fully stretched out and accelerating, the arm needs <b>about 4 Nm</b> at the shoulder. A stepper with a 27:1 gearbox gives <b>about 7 Nm peak</b>, and our own torque test confirmed it.</p><dl class="step-meta"><div><dt>≈4 Nm</dt><dd>needed</dd></div><div><dt>≈7 Nm</dt><dd>peak</dd></div><div><dt>27 : 1</dt><dd>gearbox</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">03</span><span class="label">Elbow and wrist</span><h3>Light up top, strong at the base</h3><p><b>Servos at the elbow and wrist</b> keep the mass close to the base, so the steppers only carry what they must and the arm stays quick.</p><dl class="step-meta"><div><dt>2 × DS3240</dt><dd>servos</dd></div><div><dt>2020</dt><dd>aluminium links</dd></div></dl></div></div>
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">04</span><span class="label">Tools</span><h3>Swap tools in seconds</h3><p>Twist the gripper <b>35°</b> and it lifts off. Push it back and twist to lock: lugs catch under the lip and a <b>sideways pogo connector</b> closes, so power reaches the tool without a cable.</p><dl class="step-meta"><div><dt>35°</dt><dd>twist to unlock</dd></div><div><dt>2</dt><dd>tools: gripper, electromagnet</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">05</span><span class="label">Result</span><h3>Sorting on its own</h3><p>The camera finds a brick, inverse kinematics plans the pick, the parallel jaws close on it and the arm drops it in its bin, then <b>repeats until the table is clear</b>, with no one touching it.</p><dl class="step-meta"><div><dt>48 / 50</dt><dd>sorted in the test</dd></div><div><dt>96 %</dt><dd>success rate</dd></div></dl></div></div>
+        </div>
+      </div>
+
+      <div class="lead-media pair">
+        <figure>
+          <img src="assets/ares4-upright.jpg" width="936" height="1600" alt="The whole ARES-4 setup: the arm standing upright on its sorting table, the camera on its mast above, LEGO bricks and the sorting bins">
+          <figcaption>The full cell: the arm, its overhead camera and the work area.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/ares4-pick.jpg" width="1080" height="810" alt="The gripper's parallel jaws closing on a blue LEGO brick" loading="lazy">
+          <figcaption>Mid-pick: the parallel jaws close on a brick the camera found.</figcaption>
+        </figure>
+      </div>
+
+      <div class="brief">
+        <div class="card"><span class="label">Problem</span><p>Build a modular robot arm that isn't tied to one task. Tools swap through a quick-change interface, and the software lets the user define, preview and run new tasks. Targets came from real tasks: about 500 g payload, and enough accuracy to pick up LEGO bricks.</p></div>
+        <div class="card"><span class="label">My role</span><p>In a team of three, I drove the <b>mechanical design, the electronics and the software</b>: from motor sizing and CAD to the KiCad wiring, ESP32-S3 firmware, kinematics and the control dashboard.</p></div>
+        <div class="card result"><span class="label">Result</span><span class="big">48 / 50</span><p>bricks detected, picked and sorted without help (96 %) in the LEGO-sorting test. Carried a payload of about 500 g.</p></div>
+      </div>
+
+      <div class="decisions">
+        <h3>Key design decisions</h3>
+        <ol>
+          <li><b>Motor sizing loop.</b> Worst-case torque (arm fully extended and accelerating), iterating reach, acceleration and motor mass until it converged: about 500 mm reach and about 4 Nm at the shoulder. That called for a stepper with a 27:1 gearbox (about 7 Nm peak), which we checked with our own torque test.</li>
+          <li><b>Torque where it's needed.</b> Steppers at the base and shoulder; light servos at the elbow and wrist to keep mass off the arm.</li>
+          <li><b>Aluminium links, printed joints.</b> 2020 extrusion links with custom printed joint adapters: stiffer than printed links, far less print time, and each joint module can be changed on its own.</li>
+          <li><b>Quick-swap tools.</b> Align, insert, rotate, lock: the same arm runs a parallel gripper or an electromagnet without tools. Pogo pins in the interface connect the tool's power automatically when it locks.</li>
+          <li><b>Modular electronics.</b> Separate perfboard modules so faults can be isolated. I moved from DRV8825 to TB6600 drivers for robustness and added a transistor module so the 3.3 V ESP32-S3 can drive their 5 V inputs.</li>
+          <li><b>Encoder-corrected shoulder.</b> Open-loop steppers, plus an AS5048A absolute encoder that measures the real shoulder angle after each move and corrects it.</li>
+        </ol>
+      </div>
+
+      <div class="demo">
+        <video src="assets/ares4-demo.mp4" poster="assets/ares4-demo-poster.jpg" controls muted playsinline preload="none" width="540" height="960"></video>
+        <div>
+          <h3>Vision, kinematics and a browser dashboard</h3>
+          <p>The PC runs DH forward kinematics, Jacobian inverse kinematics, trajectory planning and camera-based colour detection; the ESP32-S3 drives the hardware. <b>Sorting is fully automatic:</b> the camera finds a brick, inverse kinematics plans the pick, the arm grips it and drops it in the bin for its colour, and the loop repeats until the table is clear, with no input from anyone. When you set up a new move by hand, the dashboard previews it as a ghost arm and path before it runs. The video shows a full sorting run.</p>
+          <figure>
+            <img class="zoom" src="assets/ares4-dashboard.jpg" width="2000" height="1125" alt="ARES-4 dashboard: Jacobian IK target and results, and the 3D viewport with the arm in its ready pose, a ghost arm at the pick target and the planned path" loading="lazy" style="border-radius:8px;cursor:zoom-in">
+            <figcaption>The dashboard, rendered from the project code in simulation mode: from its ready pose, the arm previews a pick on the table as a ghost arm with the planned 80-point path, before anything moves.</figcaption>
+          </figure>
+          <p style="margin-top:16px"><a class="btn" href="https://github.com/Jamalch15/ARES-4">Source, firmware, KiCad and calculations on GitHub →</a></p>
+        </div>
+      </div>
+
+      <div class="gallery-wrap">
+        <h3 class="gallery-title">From the engineering report</h3>
+        <div class="gallery" style="grid-template-columns:repeat(4,1fr)">
+          <figure><img class="fit" src="assets/ares4-fbd.jpg" alt="Free body diagram used for the torque sizing" loading="lazy"><figcaption>Free body diagram behind the motor sizing</figcaption></figure>
+          <figure><img class="fit" src="assets/ares4-quickswap.jpg" alt="Quick-swap sequence: align, insert, rotate, locked" loading="lazy"><figcaption>Quick-swap: align, insert, rotate, lock</figcaption></figure>
+          <figure><img src="assets/ares4-gripper-render.jpg" alt="Render of the gear-driven parallel gripper" loading="lazy"><figcaption>Gear-driven parallel gripper</figcaption></figure>
+          <figure><img class="fit" src="assets/ares4-dh-frames.jpg" alt="DH coordinate frames on the arm model" loading="lazy"><figcaption>DH frames for the kinematics</figcaption></figure>
+          <figure><img src="assets/ares4-electronics.jpg" alt="Electronics modules on a board: drivers, buck converters, ESP32-S3" loading="lazy"><figcaption>Modular electronics: separate boards so faults can be isolated</figcaption></figure>
+          <figure><img class="fit" src="assets/ares4-wiring.jpg" alt="KiCad wiring diagram" loading="lazy"><figcaption>KiCad wiring diagram</figcaption></figure>
+          <figure><img class="fit" src="assets/ares4-software.jpg" alt="Software architecture: browser GUI, Python backend, ESP32-S3 firmware, hardware" loading="lazy"><figcaption>Software architecture</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Cycloidal actuator -->
+  <section class="project" id="cycloidal">
+    <div class="wrap">
+      <div class="project-head">
+        <span class="num">02</span>
+        <h2>Cycloidal QDD Actuator</h2>
+        <div class="meta">
+          <span class="chip status design">In development</span>
+          <span class="ctx">Independent project</span>
+        </div>
+      </div>
+      <p class="lede"><b>A printable, backdrivable robot joint, designed from scratch.</b> A low-ratio cycloidal drive on a drone motor: the kind of actuator legged robots and cobots use, built to be printed at home from few bought parts.</p>
+      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks · cycloid geometry</dd></div><div><dt>Drive</dt><dd>BLDC motor · FOC control · bearing selection</dd></div><div><dt>Build</dt><dd>FDM printing</dd></div></dl>
+
+      <div class="ares3d qdd3d" data-qdd3d>
+        <div class="ares3d-stage">
+          <canvas aria-label="Interactive 3D model of the cycloidal actuator, built from the original SolidWorks assembly"></canvas>
+          <div class="ares3d-labels" aria-hidden="true"></div>
+          <div class="qdd-hud" aria-hidden="true"><span>Input <b data-in>0.0</b> turns</span><span class="out">Output <b data-out>0.00</b> turns</span></div>
+          <div class="ares3d-dots" aria-label="Steps"></div>
+          <span class="ares3d-note">3D model from the original SolidWorks assembly · scroll, or drag to orbit</span>
+        </div>
+        <div class="ares3d-steps">
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">01</span><span class="label">The actuator</span><h3>A drone motor and a 15:1 cycloid</h3><p>A <b>T-Motor MN6007 II</b> outrunner drives a <b>15:1 cycloidal stage</b> in a printed housing. The ratio is low on purpose, so the joint stays backdrivable and quick to respond.</p><dl class="step-meta"><div><dt>15 : 1</dt><dd>reduction</dd></div><div><dt>MN6007 II</dt><dd>outrunner motor</dd></div><div><dt>FOC</dt><dd>motor control</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">02</span><span class="label">Inside</span><h3>Printed, with a few bought parts</h3><p>Almost everything you see is <b>designed to be printed at home</b>, around a few bought parts such as the motor and the bearings.</p><dl class="step-meta"><div><dt>2</dt><dd>cycloidal discs</dd></div><div><dt>3-piece</dt><dd>eccentric shaft</dd></div><div><dt>5</dt><dd>output pins</dd></div></dl></div></div>
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">03</span><span class="label">The cycloid</span><h3>Fifteen turns in, one turn out</h3><p>The eccentric shaft swings both discs around the lobed housing. Each input turn walks a disc back by <b>one lobe</b>, so the output turns <b>once for every 15</b> turns of the motor.</p><dl class="step-meta"><div><dt>2 mm</dt><dd>eccentricity</dd></div><div><dt>15</dt><dd>lobes per disc</dd></div><div><dt>180°</dt><dd>between the discs</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">04</span><span class="label">Status</span><h3>From printed prototype to final design</h3><p>The first prototype was <b>printed and fitted with real bearings</b> to check fits against the CAD. This two-disc design builds on it; next come <b>fit samples, assembly and hand-turn tests</b>.</p><dl class="step-meta"><div><dt>Printed</dt><dd>first prototype</dd></div><div><dt>Complete</dt><dd>current design, in CAD</dd></div></dl></div></div>
+        </div>
+      </div>
+
+      <div class="lead-media pair-even">
+        <figure><img src="assets/qdd-v1-printed-parts.jpg" width="1536" height="1152" alt="First printed prototype: cycloidal disc with bearings, housing, outrunner BLDC motor and FOC control board" loading="lazy"><figcaption>The first printed prototype: disc, housing, bearings, the outrunner motor and the FOC board, laid out for integration.</figcaption></figure>
+        <figure><img src="assets/qdd-v1-printed-disc.jpg" alt="Printed prototype cycloidal disc with a bearing fitted" loading="lazy"><figcaption>A printed disc with its bearing fitted, to check real fits against the CAD.</figcaption></figure>
+      </div>
+
+      <div class="brief">
+        <div class="card"><span class="label">Problem</span><p>A backdrivable, controllable actuator for robotics: light, compact and 3D-printable on a home FDM printer, with as few off-the-shelf parts as possible and a low cost.</p></div>
+        <div class="card"><span class="label">My role</span><p>Independent project: concept, calculations, all of the SolidWorks design, printing and fitting the parts.</p></div>
+        <div class="card result"><span class="label">Status</span><span class="big">15 : 1</span><p>The first prototype was <b>printed and fitted with real bearings</b>; the two-disc design shown here is complete in CAD. Next: fit samples, assembly and hand-turn tests.</p></div>
+      </div>
+
+      <div class="decisions">
+        <h3>Key design decisions</h3>
+        <ol>
+          <li><b>Low ratio on purpose.</b> A quasi-direct drive needs a low reduction to stay backdrivable and responsive. This design is 15:1, inside my 12–16:1 target range.</li>
+          <li><b>Drone motor, not a stepper.</b> An outrunner BLDC (T-Motor MN6007 II) with a field-oriented-control board, instead of a NEMA 17 or an expensive integrated servo.</li>
+          <li><b>Test the fit, not just the geometry.</b> The first prototype's disc and housing were printed early to check real bearing fits and interfaces against the CAD.</li>
+          <li><b>No ring pins.</b> The discs roll directly against a profile in the printed housing. Printed sleeves over screws had left seam lines that caused friction.</li>
+          <li><b>Two phase-shifted discs.</b> Two discs on the eccentric shaft, phase-shifted against each other.</li>
+          <li><b>Serviceable eccentric shaft.</b> Three pieces clamped with M3 screws and nuts, so the 6803 bearings fit inside the discs. The output carrier runs on 6805 and 61806 bearings.</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03 QR scanner -->
+  <section class="project alt" id="qr-scanner">
+    <div class="wrap">
+      <div class="project-head">
+        <span class="num">03</span>
+        <h2>Wall-Mounted QR Scanner</h2>
+        <div class="meta">
+          <span class="chip status use">In use every week</span>
+          <span class="ctx">Independent, for an association</span>
+        </div>
+      </div>
+      <p class="lede"><b>Built, used, learned from, rebuilt.</b> I designed the hardware for a wall-mounted check-in terminal, put it on the wall, watched how people really used it, and redesigned it. <b>V2 is far cleaner and in use every week.</b></p>
+      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks</dd></div><div><dt>Hardware</dt><dd>Raspberry Pi 3B+ · GM60 scanner · display</dd></div><div><dt>Build</dt><dd>FDM printing · assembly and testing</dd></div></dl>
+
+      <div class="iter">
+        <div class="iter-step">
+          <span class="iter-k">V1</span>
+          <figure><img src="assets/qr-v1-cad.jpg" width="760" height="570" alt="V1 enclosure in SolidWorks: front with display opening and scan window, and the back shell with the Raspberry Pi" loading="lazy"></figure>
+          <h4>Built and put on the wall</h4>
+          <p>An enclosure designed around the display, the GM60 scanner and the Raspberry Pi, printed, assembled and mounted.</p>
+        </div>
+        <div class="iter-arrow" aria-hidden="true"></div>
+        <div class="iter-step">
+          <span class="iter-k">In use</span>
+          <h4>Watched how people used it</h4>
+          <p>With V1 on the wall, we <b>logged its issues</b> and noted how people actually used the terminal day to day.</p>
+        </div>
+        <div class="iter-arrow" aria-hidden="true"></div>
+        <div class="iter-step v2">
+          <span class="iter-k">V2</span>
+          <h4>Rebuilt to fix all of it</h4>
+          <ul>
+            <li>Larger official 5-inch Raspberry Pi display</li>
+            <li>A clearly separate scan opening</li>
+            <li>An easier-to-read front</li>
+            <li>Simpler wall installation</li>
+            <li>Sturdier internal mounting</li>
+            <li>Quick to assemble and service</li>
+          </ul>
+          <p class="iter-foot">In use at the association every week.</p>
+        </div>
+      </div>
+
+      <div class="brief">
+        <div class="card"><span class="label">Problem</span><p>An association needed a fixed QR check-in station: a scanner, a Raspberry Pi and a display in one compact unit on the wall, robust enough for weekly use.</p></div>
+        <div class="card"><span class="label">My role</span><p>I designed and built the hardware: the SolidWorks enclosure and wall mount, the packaging of display, GM60 scanner and Raspberry Pi, printing, assembly and testing. The application software was handled separately.</p></div>
+        <div class="card result"><span class="label">Result</span><span class="big">V2, every week</span><p>V2 fixes the issues found on V1 in real use and is far cleaner. It is in use at the association every week.</p></div>
+      </div>
+
+      <div class="decisions">
+        <h3>Key design decisions</h3>
+        <ol>
+          <li><b>Designed around the real parts.</b> The display, GM60 scanner and Raspberry Pi set the packaging. The CAD accounts for fasteners, clearances, cable routing and access for assembly.</li>
+          <li><b>Print-ready.</b> Every housing part is designed for FDM printing and printed, assembled and tested on the real hardware.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Syringe pump -->
+  <section class="project" id="syringe-pump">
+    <div class="wrap">
+      <div class="project-head">
+        <span class="num">04</span>
+        <h2>Motor-Driven Syringe Pump</h2>
+        <div class="meta">
+          <span class="chip status done">Completed</span>
+          <span class="ctx">DTU course project · team of 3</span>
+        </div>
+      </div>
+      <p class="lede"><b>A printed syringe pump within 99–101 % of set flow.</b> A modular pump that pushes and pulls, takes 6–24 mL syringes and turns stepper rotation into precise plunger travel. I modelled it, built it and measured it.</p>
+      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks</dd></div><div><dt>Build</dt><dd>FDM printing · laser cutting</dd></div><div><dt>Control and test</dt><dd>Arduino · calibration · flow measurement</dd></div></dl>
+
+      <div class="lead-media pump">
+        <figure><img src="assets/pump-prototype.jpg" width="1200" height="900" alt="Syringe pump prototype: stepper motor, lead screw, push plate and syringe on an acrylic base" loading="lazy"></figure>
+        <div class="stack">
+          <figure class="contain"><img src="assets/pump-cad.jpg" width="1068" height="507" alt="SolidWorks model of the final pump" loading="lazy"></figure>
+          <figure class="contain"><img src="assets/pump-legs.jpg" width="1200" height="529" alt="Four iterations of the front leg and clamp part" loading="lazy"></figure>
+        </div>
+      </div>
+
+      <div class="brief">
+        <div class="card"><span class="label">Problem</span><p>Build a modular syringe pump that can both push and pull, delivers programmed flow rates with good linearity, and takes different syringe sizes.</p></div>
+        <div class="card"><span class="label">My role</span><p>I did the CAD modelling (with feedback from the group), built the physical prototype and ran the data collection and processing.</p></div>
+        <div class="card result"><span class="label">Result</span><span class="big">99–101 %</span><p>of the set flow rate with 6, 12 and 24 mL syringes at 1–5 mL/min, at 1/16 and 1/32 microstepping. 3 repeats per point on a 0.01 g scale.</p></div>
+      </div>
+
+      <div class="decisions">
+        <h3>Key design decisions</h3>
+        <ol>
+          <li><b>Lead-screw drive.</b> A NEMA 17 stepper turns an M8 threaded rod through a flexible aluminium coupling, and a nut in the push plate turns rotation into plunger travel. It's driven by an Arduino and a TB6600 driver.</li>
+          <li><b>Small parts, fast loops.</b> Separate small parts, each printed in under half an hour, instead of days for one large part.</li>
+          <li><b>Clamp that copies a hand.</b> The clamp grips the syringe by its own finger flanges. The four legs were joined into two for stiffness, and it takes syringes up to 22 mm outer diameter.</li>
+          <li><b>Stiff, play-free push plate.</b> Made thicker, with a tighter pocket, to stop it bending under load and to remove play when the direction reverses.</li>
+          <li><b>Stiffer acrylic base.</b> Laser-cut base increased from 3 to 5 mm for firm press fits, with M8 holes on a 25 mm grid for breadboard mounting.</li>
+          <li><b>Honest failure analysis.</b> Full-step drive made the push plate skew on its guide rods. I documented the cause and proposed a stiffer guide for the next revision.</li>
+        </ol>
+      </div>
+
+      <div class="gallery-wrap">
+        <h3 class="gallery-title">Test data</h3>
+        <div class="gallery" style="grid-template-columns:repeat(2,1fr);max-width:820px">
+          <figure><img class="fit" src="assets/pump-calibration.jpg" alt="Calibration curve, 24 mL at 1/32 microstepping: slope 1.0047, R² = 1" loading="lazy"><figcaption>Calibration curve, 24 mL at 1/32 microstepping</figcaption></figure>
+          <figure><img class="fit" src="assets/pump-accuracy.jpg" alt="Accuracy versus flow rate for all syringe sizes and microstep settings" loading="lazy"><figcaption>Accuracy across syringe sizes and flow rates</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Honorable mentions -->
+  <section class="also" id="honorable-mentions">
+    <div class="wrap">
+      <span class="label" style="color:var(--signal)">Honorable mentions</span>
+      <h2 class="also-title">More I've built</h2>
+      <p class="also-intro">Projects that ran for months alongside my studies, each with its own engineering story.</p>
+      <ul>
+        <li>
+          <b>Vision-guided nerf turret</b>
+          <div class="meta"><span class="chip status done">Working prototype</span><span class="chip">2024–2026</span></div>
+          <div class="meta"><span class="chip">YOLOv8n</span><span class="chip">OpenCV</span><span class="chip">Arduino</span><span class="chip">Steppers</span><span class="chip">Bluetooth</span></div>
+          <p>A pan/tilt turret that finds a target and fires on its own. A camera on the blaster feeds YOLOv8n in Python on a PC; the target's offset in the image, with a deadband, becomes yaw and pitch commands sent over HC-05 Bluetooth to an Arduino driving two steppers.</p>
+          <p class="small">Mechanics designed in CAD and printed, with bearings in the joints. My first soldered perfboard. Detection runs at about 20 FPS on a CPU.</p>
+        </li>
+        <li>
+          <b>Bike-powered phone charger</b>
+          <div class="meta"><span class="chip status design">Electrical prototype · team of 2</span><span class="chip">2024–2025</span></div>
+          <div class="meta"><span class="chip">Power electronics</span><span class="chip">Supercapacitor</span><span class="chip">USB-PD</span><span class="chip">Chain drive</span></div>
+          <p>A charger designed to keep a phone charging through stops. A bike-driven generator feeds a buck converter, a supercapacitor buffer (2.7 V, 500 F) and a boost stage to a USB Power Delivery output.</p>
+          <p class="small">Built with a fellow mechanical engineering student. The drive concept moved from a friction-wheel dynamo towards a chain take-off for robustness. The electrical side was prototyped; the bike integration is still ahead.</p>
+        </li>
+        <li>
+          <b>Table football goalkeeper bot</b>
+          <div class="meta"><span class="chip status design">Mechanism CAD + partial build</span><span class="chip">2025–2026</span></div>
+          <div class="meta"><span class="chip">2-DOF mechanism</span><span class="chip">Belt drive</span><span class="chip">Encoders</span><span class="chip">Structural simulation</span></div>
+          <p>A robot that plays goalkeeper on a table football table: two degrees of freedom, a belt drive that slides the keeper rod and a second axis that rotates it.</p>
+          <p class="small">Designed in CAD with structural simulation. I compared steppers, DC motors with encoders and servos for the axes, and evaluated a 500 pulse-per-revolution encoder. Camera-based ball tracking is the next stage.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <span class="label" style="color:var(--signal)">Open to</span>
+      <h2>An engineering internship from February 2027, and a student job alongside my studies.</h2>
+      <p>Mechanical design, robotics and mechatronics. Based in Copenhagen.</p>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="mailto:charkiejamal558@gmail.com">charkiejamal558@gmail.com</a>
+      <a class="btn" href="https://www.linkedin.com/in/jamalcharkie">LinkedIn</a>
+      <a class="btn" href="https://github.com/Jamalch15">GitHub</a>
+      <a class="btn" href="portfolio.pdf">PDF</a>
+    </div>
+  </div>
+  <div class="fine"><div class="wrap">Jamal Charkie · BEng Mechanical Engineering, DTU</div></div>
+</footer>
+
+<dialog class="lightbox" id="lightbox"><img alt=""><p></p></dialog>
+<script>
+  // Click any gallery image or the dashboard to see it large; click again or press Esc to close.
+  const box = document.getElementById('lightbox');
+  document.querySelectorAll('.gallery img, img.zoom').forEach(img => img.addEventListener('click', () => {
+    box.querySelector('img').src = img.src;
+    box.querySelector('img').alt = img.alt;
+    box.querySelector('p').textContent = img.alt;
+    box.showModal();
+  }));
+  box.addEventListener('click', () => box.close());
+
+  // Hero depth: the two renders drift at different depths with the pointer and the first screen of scroll.
+  (() => {
+    const art = document.querySelector('[data-parallax]');
+    if (!art || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const [arm, sec] = art.querySelectorAll('img');
+    let mx = 0, my = 0, tx = 0, ty = 0;
+    addEventListener('pointermove', e => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; }, { passive: true });
+    (function tick() {
+      if (scrollY < innerHeight * 1.2) {
+        const sy = innerWidth >= 960 ? scrollY : 0;      // scroll depth only where the art sits beside the text
+        tx += (mx - tx) * 0.06; ty += (my - ty) * 0.06;
+        arm.style.translate = `${(tx * -10).toFixed(2)}px ${(ty * -8 - sy * 0.05).toFixed(2)}px`;
+        sec.style.translate = `${(tx * 18).toFixed(2)}px ${(ty * 14 - sy * 0.14).toFixed(2)}px`;
+      }
+      requestAnimationFrame(tick);
+    })();
+  })();
+</script>
+</body>
+</html>
