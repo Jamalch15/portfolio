@@ -233,8 +233,6 @@ footer .cta { justify-content: flex-end; }
           mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%); }
 .ares3d-note { position: absolute; right: 24px; bottom: 18px; font-size: 12px; color: var(--steel); letter-spacing: .04em; }
 .ares3d-labels { position: absolute; inset: 0; pointer-events: none; }
-.ares3d-stage canvas { cursor: grab; touch-action: pan-y; }
-.ares3d-stage canvas:active { cursor: grabbing; }
 .ares3d-dots { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 12px; z-index: 2; }
 .ares3d-dots button { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 1.5px solid var(--steel); background: transparent; cursor: pointer; transition: background .3s, transform .3s; }
 .ares3d-dots button.on { background: var(--signal); border-color: var(--signal); transform: scale(1.3); }

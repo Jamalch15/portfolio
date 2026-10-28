@@ -36,6 +36,17 @@ const LABELS = {
   output: ['Output', 'Pins through the discs turn it once per 15 motor turns'],
   ratio: ['15 : 1', 'reduction, inside the 12–16:1 target'],
 };
+// where each callout sits on each step: [dx, dy] from its part, in px (negative dx: label to the left; false: hidden)
+const PLACE = {
+  wide: [{},
+    { output: [-219, -10], shaft: [-165, -30], discs: [-236, 20], housing: [-242, 20] },
+    { discs: [230, -40] },
+    { ratio: [-80, -150] }],
+  phone: [{},
+    { output: [70, -10], shaft: [-75, -10], discs: [-112, 5], housing: [-115, 0] },
+    { discs: false },                  // no room beside the housing on a phone; the card says it
+    { ratio: [112, 25] }],
+};
 const CUT_AZ = 42;                        // the cutaway faces this azimuth (deg) and never moves
 const EXPLODE_S = 3;                      // seconds for the full explode or reassembly
 const ANCHOR_UNIT = { housing: 'housing', shaft: 'discHub', discs: 'discA', output: 'carrier', ratio: 'carrier' };
@@ -45,29 +56,6 @@ const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda
 // critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
-// points spread evenly over a model's surfaces (by area, so big flat faces count as much as detailed ones);
-// callouts look for a spot with none of them underneath
-function surfacePoints(root, N) {
-  const pts = [], A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
-  const each = fn => root.traverse(m => {
-    if (!m.isMesh) return;
-    const pos = m.geometry.attributes.position, idx = m.geometry.index, n = (idx ? idx.count : pos.count) / 3, s2 = m.matrixWorld.getMaxScaleOnAxis() ** 2;
-    const at = j => idx ? idx.getX(j) : j;
-    for (let t = 0; t < n; t++) {
-      A.fromBufferAttribute(pos, at(3 * t)); B.fromBufferAttribute(pos, at(3 * t + 1)); C.fromBufferAttribute(pos, at(3 * t + 2));
-      fn(m, e1.subVectors(B, A).cross(e2.subVectors(C, A)).length() / 2 * s2);
-    }
-  });
-  let total = 0; each((m, a) => { total += a; });
-  const step = total / N; let acc = step / 2;
-  each((m, a) => {
-    for (acc -= a; acc < 0; acc += step) {
-      let u = Math.random(), w = Math.random(); if (u + w > 1) { u = 1 - u; w = 1 - w; }
-      pts.push([m, A.clone().addScaledVector(e1.subVectors(B, A), u).addScaledVector(e2.subVectors(C, A), w)]);
-    }
-  });
-  return pts;
-}
 const smooth = t => t * t * (3 - 2 * t);
 function webglOK() { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } }
 
@@ -167,8 +155,6 @@ async function init() {
     }
   }
 
-  const cloud = surfacePoints(drive, 1800);
-  const cloudX = new Float32Array(cloud.length), cloudY = new Float32Array(cloud.length);
 
   // ---- callouts (same layout rules as the ARES-4 scene) ----
   const SVG = 'http://www.w3.org/2000/svg';
@@ -184,7 +170,7 @@ async function init() {
     const g = document.createElementNS(SVG, 'g');
     g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/>';
     labelLayer.appendChild(el); leaders.appendChild(g);
-    o.userData = { el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0 };
+    o.userData = { name, el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0 };
     anchors[name] = o;
   }
   const layout = { row: false, vo: null };
@@ -194,7 +180,7 @@ async function init() {
   let active = fixedStep ?? 0;
   const cur = { cam: [...KEYS[active].cam], look: [...KEYS[active].look], camV: [0, 0, 0], lookV: [0, 0, 0], explode: KEYS[active].explode, speed: KEYS[active].speed, cut: KEYS[active].cut,
                 fades: rig.order.map(name => KEYS[active].hide.includes(name) ? 0 : 1) };
-  let theta = 0, theta0 = 0, orbit = 0, drag = 0, dragVel = 0, dragging = false, lastX = 0;
+  let theta = 0, theta0 = 0, orbit = 0;
   const dots = steps.map((s, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Step ${i + 1}: ${s.querySelector('h3')?.textContent ?? ''}`);
     b.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -212,9 +198,6 @@ async function init() {
     steps.forEach((s, i) => { const r = s.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) setActive(i); });
   }
   steps.forEach((s, k) => s.classList.toggle('active', k === active)); dots[active]?.classList.add('on');
-  canvas.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; canvas.setPointerCapture(e.pointerId); });
-  canvas.addEventListener('pointermove', e => { if (!dragging) return; const dx = e.clientX - lastX; lastX = e.clientX; drag += dx * 0.25; dragVel = dx * 0.25; });
-  canvas.addEventListener('pointerup', () => { dragging = false; });
 
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -255,15 +238,14 @@ async function init() {
     setDrive(theta, cur.explode, cur.fades);
     cur.cut = frozen ? k.cut : damp(cur.cut, k.cut, 2.4, dt);
 
-    // camera: orbit around a damped look point; steps with orbit > 0 revolve slowly; drag adds azimuth and eases back
+    // camera: orbit around a damped look point; steps with orbit > 0 revolve slowly
     // steps without orbit ease back to the nearest whole turn, so the camera ends where the step frames it
     orbit = frozen ? 0 : k.orbit ? orbit + k.orbit * dt : damp(orbit, Math.round(orbit / 360) * 360, 1.4, dt);
     cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, 2.0, dt);
     cur.look = frozen ? [...k.look] : spring(cur.look, cur.lookV, k.look, 2.0, dt);
-    if (!dragging) { dragVel *= Math.exp(-6 * dt); drag = damp(drag + dragVel, 0, 0.6, dt); }
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
-    const A = D2R(az + orbit + drag), E = D2R(el);
+    const A = D2R(az + orbit), E = D2R(el);
     setCut(CUT_AZ, cur.cut);
     camera.position.set(Math.cos(E) * Math.cos(A), Math.sin(E), Math.cos(E) * Math.sin(A)).multiplyScalar(dist * portrait).add(lookV);
     camera.lookAt(lookV);
@@ -289,61 +271,23 @@ async function init() {
       d.on = on;
       if (d.a > 0.01) shown.push(d); else { d.el.style.opacity = 0; d.g.style.opacity = 0; d.x = d.y = null; }
     }
-    // Callouts sit next to their part, in whichever nearby spot is freest: few model points under the label (from
-    // the projected point cloud), no other label, not the active card and not off-screen. Leaders stay short. A
-    // label keeps its spot until another one is clearly better, so labels don't jump around as the model moves.
-    const live = shown.filter(d => d.on), small = layout.row, LW = small ? 108 : 210;
-    const cardEl = steps[active]?.querySelector('.step-card'), cr = cardEl?.getBoundingClientRect(), sr = canvas.getBoundingClientRect();
-    const card = cr && cr.width ? [cr.left - sr.left, cr.top - sr.top, cr.right - sr.left, cr.bottom - sr.top] : null;
-    if (live.length) {
-      const vis = new Map();
-      for (let i = 0; i < cloud.length; i++) {
-        const m = cloud[i][0];
-        if (!vis.has(m)) { let o = m, ok = true; for (; o; o = o.parent) if (!o.visible) { ok = false; break; } vis.set(m, ok); }
-        if (!vis.get(m)) { cloudX[i] = NaN; continue; }
-        v.copy(cloud[i][1]).applyMatrix4(m.matrixWorld).project(camera); cloudX[i] = (v.x + 1) / 2 * w; cloudY[i] = (1 - v.y) / 2 * h;
-      }
-    }
-    const overlap = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
-    const placed = [];
-    const DIRS = [[1, -1], [-1, -1], [1, 1], [-1, 1], [1, 0], [-1, 0], [0, -1], [0, 1]];
-    for (const d of live.sort((p, q) => p.ay - q.ay)) {
-      d.el.classList.toggle('compact', small);
-      if (!d.h || d.small !== small) { d.el.style.width = LW + 'px'; d.h = d.el.offsetHeight; d.small = small; }
-      let best = null;
-      for (const R of small ? [30, 60, 95, 130] : [44, 100, 160, 230]) for (let k = 0; k < DIRS.length; k++) {
-        const [dx, dy] = DIRS[k], n = Math.hypot(dx, dy), px = d.ax + dx / n * R, py = d.ay + dy / n * R;
-        const x = dx < 0 ? px - LW : dx > 0 ? px : px - LW / 2, y = dy < 0 ? py - d.h : dy > 0 ? py : py - d.h / 2;
-        const box = [x, y, x + LW, y + d.h];
-        let cost = R * 0.4;
-        // the leader runs from the part to the nearest point of the label; it may cross the model a little
-        const ex = Math.min(Math.max(d.ax, box[0]), box[2]) - d.ax, ey = Math.min(Math.max(d.ay, box[1]), box[3]) - d.ay, ll = ex * ex + ey * ey || 1;
-        for (let i = 0; i < cloud.length; i++) {
-          const cx = cloudX[i], cy = cloudY[i];         // a little clearance around the text, too
-          if (cx >= box[0] - 10 && cx <= box[2] + 10 && cy >= box[1] - 8 && cy <= box[3] + 8) { cost += 4; continue; }
-          const u = Math.min(1, Math.max(0, ((cx - d.ax) * ex + (cy - d.ay) * ey) / ll));
-          if (u > 0.25 && Math.hypot(cx - d.ax - u * ex, cy - d.ay - u * ey) < 5) cost += 1;
-        }
-        for (const b of placed) cost += overlap(box, b) * 0.5;
-        if (card) cost += overlap(box, [card[0] - 12, card[1] - 12, card[2] + 12, card[3] + 12]) * 0.5;
-        cost += (Math.max(0, 12 - box[0]) + Math.max(0, box[2] - (w - (small ? 12 : 48))) + Math.max(0, (small ? 64 : 56) - box[1]) + Math.max(0, box[3] - (h - 12))) * 40;
-        const key = R * 10 + k;
-        if (key === d.key) cost -= 60;                       // stickiness: stay unless clearly better elsewhere
-        if (!best || cost < best.cost) best = { cost, key, box, dx };
-      }
-      d.key = best.key; d.tx = best.box[0]; d.ty = best.box[1]; d.flip = best.dx < 0;
-      placed.push(best.box);
-    }
+    // Callouts: each has a set place per step (PLACE), an offset from its part, so it follows the part when that moves
+    // (the lifted tool, the turning discs). Offsets are px at a 900 px (phone: 844 px) tall view and scale with it.
+    const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
+    if (params.has('debug')) section.dataset.anchors = JSON.stringify(Object.fromEntries(shown.map(d => [d.name, [Math.round(d.ax), Math.round(d.ay)]])));
     for (const d of shown) {
-      d.el.style.opacity = d.a; d.g.style.opacity = d.a;
+      const a = place[d.name] === false ? 0 : d.a;
+      d.el.style.opacity = a; d.g.style.opacity = a;
       if (!d.on) continue;                                    // fading out: stays exactly where it was
-      const snap = d.x == null || frozen;
-      d.x = snap ? d.tx : damp(d.x, d.tx, 7, dt); d.y = snap ? d.ty : damp(d.y, d.ty, 7, dt);
-      d.el.classList.toggle('flip', d.flip);
-      d.el.style.transform = `translate(${d.x.toFixed(1)}px, ${d.y.toFixed(1)}px)`;
-      // leader: from the part to the nearest point of the label, stopping just short of the text
-      const ex = Math.min(Math.max(d.ax, d.x - 6), d.x + LW + 6), ey = Math.min(Math.max(d.ay, d.y + 9), d.y + d.h - 6);
-      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`);
+      if (!d.h || d.small !== small) {
+        d.el.classList.toggle('compact', small); d.el.style.width = LW + 'px';
+        d.h = d.el.offsetHeight; d.bh = d.el.firstChild.offsetHeight; d.small = small;
+      }
+      const [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc), flip = ox < 0;
+      const x = d.ax + ox - (flip ? LW : 0), y = d.ay + oy - d.bh / 2;   // the leader meets the middle of the title
+      d.el.classList.toggle('flip', flip);
+      d.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${(d.ax + ox + (flip ? 6 : -6)).toFixed(1)},${(d.ay + oy).toFixed(1)}`);
       for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
     }
   }
