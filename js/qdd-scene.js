@@ -245,7 +245,8 @@ async function init() {
     cur.look = frozen ? [...k.look] : spring(cur.look, cur.lookV, k.look, 2.0, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
-    const A = D2R(az + orbit), E = D2R(el);
+    const sway = frozen ? 0 : Math.sin(now / 8000) * 3;   // slow ambient sway; callouts move with their parts
+    const A = D2R(az + orbit + sway), E = D2R(el);
     setCut(CUT_AZ, cur.cut);
     camera.position.set(Math.cos(E) * Math.cos(A), Math.sin(E), Math.cos(E) * Math.sin(A)).multiplyScalar(dist * portrait).add(lookV);
     camera.lookAt(lookV);

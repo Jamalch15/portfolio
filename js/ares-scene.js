@@ -354,13 +354,14 @@ async function init() {
     if (!holding && carried.parent === tool) { scene.attach(carried); carried.position.y = TRAY_FLOOR + BRICK[1] / 2; carried.rotation.x = carried.rotation.z = 0; }
     if (seg < HOLD_I && carried.parent !== tool && (seg >= 0 || !k.pick)) { carried.position.set(...brickHome); carried.rotation.set(0, brickYaw, 0); }
 
-    // camera: a fixed view per step (no dragging, no sway), so every callout has a set place
+    // camera: a fixed view per step plus a slow ambient sway; callouts are tied to their parts, so they sway along
+    const sway = frozen ? 0 : Math.sin(now / 7000) * 3;
     const lk = lookOf(k);
     cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, 2.0, dt);
     cur.look = frozen ? [...lk] : spring(cur.look, cur.lookV, lk, 2.0, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
-    const A = D2R(az), E = D2R(el);
+    const A = D2R(az + sway), E = D2R(el);
     camera.position.set(Math.cos(E) * Math.cos(A), Math.sin(E), Math.cos(E) * Math.sin(A)).multiplyScalar(dist * portrait).add(lookV);
     if (params.has('focus')) {           // close-up of one anchor: ?focus=pogo&orbit=az,el,dist
       (params.get('focus') === 'brick' ? carried : anchors[params.get('focus')]).getWorldPosition(lookV);
