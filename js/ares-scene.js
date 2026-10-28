@@ -34,7 +34,7 @@ const LABELS = {
   encoder: ['Encoder', 'AS5048A checks the real shoulder angle'],
   elbow: ['Elbow', 'DS3240 servo · light, so mass stays off the arm'],
   wrist: ['Wrist', 'DS3240 servo sets the tool angle'],
-  quickswap: ['Quick-swap', 'Twist 35° to unlock · lift off · refit · lock'],
+  quickswap: ['Quick-swap', 'Twist to unlock · lift off · refit · lock'],
   pogo: ['Pogo connector', 'Mounted sideways, so the locking twist presses the contacts together'],
   result: ['48 / 50', 'bricks picked and sorted in the final test'],
 };
@@ -45,6 +45,32 @@ const TRAY_FLOOR = 0.003;
 
 const D2R = THREE.MathUtils.degToRad;
 const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda * dt));
+// critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
+const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
+
+// points spread evenly over a model's surfaces (by area, so big flat faces count as much as detailed ones);
+// callouts look for a spot with none of them underneath
+function surfacePoints(root, N) {
+  const pts = [], A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
+  const each = fn => root.traverse(m => {
+    if (!m.isMesh) return;
+    const pos = m.geometry.attributes.position, idx = m.geometry.index, n = (idx ? idx.count : pos.count) / 3, s2 = m.matrixWorld.getMaxScaleOnAxis() ** 2;
+    const at = j => idx ? idx.getX(j) : j;
+    for (let t = 0; t < n; t++) {
+      A.fromBufferAttribute(pos, at(3 * t)); B.fromBufferAttribute(pos, at(3 * t + 1)); C.fromBufferAttribute(pos, at(3 * t + 2));
+      fn(m, e1.subVectors(B, A).cross(e2.subVectors(C, A)).length() / 2 * s2);
+    }
+  });
+  let total = 0; each((m, a) => { total += a; });
+  const step = total / N; let acc = step / 2;
+  each((m, a) => {
+    for (acc -= a; acc < 0; acc += step) {
+      let u = Math.random(), w = Math.random(); if (u + w > 1) { u = 1 - u; w = 1 - w; }
+      pts.push([m, A.clone().addScaledVector(e1.subVectors(B, A), u).addScaledVector(e2.subVectors(C, A), w)]);
+    }
+  });
+  return pts;
+}
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 function webglOK() { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } }
@@ -243,17 +269,7 @@ async function init() {
   if (params.has('debug')) console.log('grip', { JAW_GRIP, JAW_OPEN, gapOpen: jaws(atPick, JAW_OPEN).gap, hPick, brickHome });
   setJaw(0); applyPose(KEYS[0].pose); world.updateMatrixWorld(true);
 
-  // a sparse point cloud of the model: callouts sit just past its silhouette, at their own height
-  const cloud = [];
-  {
-    let total = 0; world.traverse(m => { if (m.isMesh) total += m.geometry.attributes.position.count; });
-    const every = Math.max(1, Math.floor(total / 900));
-    tray.traverse(m => { if (m.isMesh) for (const k of [0, 2, 4, 6]) cloud.push([m, new THREE.Vector3().fromBufferAttribute(m.geometry.attributes.position, k)]); });
-    world.traverse(m => {
-      if (!m.isMesh) return; const pos = m.geometry.attributes.position;
-      for (let k = 0; k < pos.count; k += every) cloud.push([m, new THREE.Vector3().fromBufferAttribute(pos, k)]);
-    });
-  }
+  const cloud = [...surfacePoints(world, 1800), ...surfacePoints(tray, 120)];
   const cloudX = new Float32Array(cloud.length), cloudY = new Float32Array(cloud.length);
 
   // ---- callouts: text beside the model, tied to each part by a leader line ----
@@ -268,20 +284,20 @@ async function init() {
     el.className = 'ares3d-label' + (name === 'result' ? ' big' : '');
     el.innerHTML = `<b>${LABELS[name][0]}</b><span>${LABELS[name][1]}</span>`;
     const g = document.createElementNS(SVG, 'g');
-    g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/><text class="n" text-anchor="middle" dy="3.6"></text>';
+    g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/>';
     labelLayer.appendChild(el); leaders.appendChild(g);
-    o.userData = { el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), num: g.querySelector('text'), a: 0, y: null, h: 0 };
+    o.userData = { el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0 };
     anchors[name] = o;
   }
-  // the callout column and the text column leave the model a band in between
-  const layout = { colX: 0, colW: 0, yMin: 0, yMax: 0 };
+  const layout = { row: false, vo: null };
 
   // ---- state & input ----
   const fixedStep = params.has('step') ? Number(params.get('step')) : null;
   let active = fixedStep ?? 0, stepStart = performance.now();
   const lookOf = k => k.look === 'ring' ? anchors.pogo.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.05, 0)).toArray() : k.look;
   world.updateMatrixWorld(true);
-  const cur = { pose: [...KEYS[active].pose, 0], cam: [...KEYS[active].cam], look: [...lookOf(KEYS[active])] };
+  const cur = { pose: [...KEYS[active].pose, 0], cam: [...KEYS[active].cam], look: [...lookOf(KEYS[active])],
+                poseV: [0, 0, 0, 0, 0], camV: [0, 0, 0], lookV: [0, 0, 0] };
   let drag = 0, dragVel = 0, dragging = false, lastX = 0;
   const dots = steps.map((s, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Step ${i + 1}: ${s.querySelector('h3')?.textContent ?? ''}`);
@@ -307,26 +323,19 @@ async function init() {
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h;
-    const wide = w / h > 1.2;
-    layout.row = !wide;                  // narrow screens: callouts in a row along the top
-    layout.colW = Math.min(250, w * 0.2);
-    layout.colX = w - layout.colW - 60;
-    [layout.yMin, layout.yMax] = [h * 0.14, h * 0.86];
-    for (const o of Object.values(anchors)) { o.userData.el.style.width = wide ? '220px' : ''; o.userData.h = 0; }
-    // wide: placeView() centres the model between the active card and the callouts, every frame;
-    // narrow: move it down into the band between the callout row and the step card
+    layout.row = w / h <= 1.2;           // narrow screens: card below, model above it, compact callouts
+    for (const o of Object.values(anchors)) o.userData.h = 0;
     layout.vo = null;
-    if (!wide) { camera.setViewOffset(w, h, 0, h * 0.15, w, h); camera.updateProjectionMatrix(); }
+    if (layout.row) { camera.setViewOffset(w, h, 0, h * 0.2, w, h); camera.updateProjectionMatrix(); }
   }
-  // the active card's side (cards alternate) decides where the model sits; callouts take the other side
+  // wide screens: the model sits in the middle of the space the active card leaves free (cards alternate sides);
+  // the callouts find their own spots around it
   function placeView(dt, snap) {
     if (layout.row) return;
     const w = canvas.clientWidth, h = canvas.clientHeight;
     const right = !!steps[active]?.classList.contains('right');
     const pad = Math.max(28, w / 2 - 600), card = Math.min(460, w - 2 * pad);
-    layout.flip = right;
-    layout.colX = right ? 60 : w - layout.colW - 60;
-    const mid = right ? (layout.colW + 110 + w - pad - card - 30) / 2 : (pad + card + 30 + layout.colX - 50) / 2;
+    const mid = ((right ? (w - pad - card) / 2 : (pad + card + w) / 2) + w / 2) / 2;   // halfway to the centre: room for callouts
     layout.vo = layout.vo == null || snap ? w / 2 - mid : damp(layout.vo, w / 2 - mid, 2.4, dt);
     camera.setViewOffset(w, h, layout.vo, 0, w, h); camera.updateProjectionMatrix();
   }
@@ -347,8 +356,10 @@ async function init() {
     if (params.has('pose')) target = [...params.get('pose').split(',').map(Number), target[4]];
     if (params.has('jaw')) target[4] = Number(params.get('jaw'));
     if (params.has('swap')) { const s = Number(params.get('swap')); swap = [rig.tool.twist_deg * Math.min(1, s * 2), 0.055 * Math.max(0, s * 2 - 1)]; }
-    const follow = k.pick ? 10 : 3.2;
-    cur.pose = cur.pose.map((x, i) => frozen || params.has('pose') ? target[i] : damp(x, target[i], follow, dt));
+    // the pick cycle follows its own timeline closely; between steps the arm eases over with a spring
+    if (frozen || params.has('pose')) cur.pose = [...target];
+    else if (k.pick) { cur.pose = cur.pose.map((x, i) => damp(x, target[i], 10, dt)); cur.poseV.fill(0); }
+    else cur.pose = spring(cur.pose, cur.poseV, target, 2.3, dt);
     applyPose(cur.pose); setJaw(cur.pose[4]); setSwap(swap[0], swap[1]);
     world.updateMatrixWorld(true);
 
@@ -361,11 +372,11 @@ async function init() {
 
     // camera: spherical orbit around a damped look point; drag adds azimuth and eases back
     const lk = lookOf(k);
-    cur.cam = cur.cam.map((x, i) => frozen ? k.cam[i] : damp(x, k.cam[i], 2.6, dt));
-    cur.look = cur.look.map((x, i) => frozen ? lk[i] : damp(x, lk[i], 2.6, dt));
+    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, 2.0, dt);
+    cur.look = frozen ? [...lk] : spring(cur.look, cur.lookV, lk, 2.0, dt);
     if (!dragging) { dragVel *= Math.exp(-6 * dt); drag = damp(drag + dragVel, 0, 0.6, dt); }
     const sway = frozen ? 0 : Math.sin(now / 7000) * 3;
-    const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 2.25 : 1;
+    const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
     const A = D2R(az + sway + drag), E = D2R(el);
     camera.position.set(Math.cos(E) * Math.cos(A), Math.sin(E), Math.cos(E) * Math.sin(A)).multiplyScalar(dist * portrait).add(lookV);
@@ -380,8 +391,8 @@ async function init() {
     renderer.render(scene, camera);
 
     // labels once settled; on the quick-swap step the pin label shows while the tool is lifted
-    const err = Math.max(...cur.pose.slice(0, 4).map((x, i) => Math.abs(x - k.pose[i])), Math.abs(cur.cam[2] - k.cam[2]) * 100);
-    const settled = k.pick || err < 4;
+    const err = Math.max(...cur.pose.slice(0, 4).map((x, i) => Math.abs(x - k.pose[i])), Math.abs(cur.cam[2] - k.cam[2]) * 60);
+    const settled = k.pick || err < 6;
     const w = canvas.clientWidth, h = canvas.clientHeight, shown = [];
     for (const [name, o] of Object.entries(anchors)) {
       const d = o.userData;
@@ -393,28 +404,12 @@ async function init() {
       d.on = on;
       if (d.a > 0.01) shown.push(d); else { d.el.style.opacity = 0; d.g.style.opacity = 0; d.x = d.y = null; }
     }
-    if (layout.row) {
-      // narrow: one row along the top, in the anchors' left-to-right order; leaders drop to the parts
-      const live = shown.filter(d => d.on).sort((p, q) => p.ax - q.ax);
-      const x0 = 16, cw = (w - x0 - 12) / Math.max(1, live.length), top = 58;
-      for (const d of shown) { d.el.style.opacity = d.a; d.g.style.opacity = d.a; }   // fading ones stay where they were
-      live.forEach((d, i) => {
-        // phones: a numbered dot on the part and the same number on its label, no leader lines to cross
-        d.el.style.width = (cw - 12) + 'px';
-        d.el.firstChild.dataset.n = i + 1; d.num.textContent = i + 1;
-        d.el.classList.remove('flip');
-        d.el.style.transform = `translate(${(x0 + i * cw).toFixed(1)}px, ${top}px)`;
-        d.line.setAttribute('points', '');
-        d.dots[0].setAttribute('r', 13); d.dots[1].setAttribute('r', 9);
-        for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
-        d.num.setAttribute('x', d.ax.toFixed(1)); d.num.setAttribute('y', d.ay.toFixed(1));
-      });
-      return;
-    }
-    // wide: callouts go on the side away from the card, each just past the model's silhouette at its own height
-    // (from a sparse point cloud of the model), so text never covers the model or the card; callouts on the same
-    // side are then nudged apart. Fading callouts stay put, so nothing jumps as it fades.
-    const live = shown.filter(d => d.on), LW = 220, GAP = 14, side = layout.flip ? -1 : 1;
+    // Callouts sit next to their part, in whichever nearby spot is freest: few model points under the label (from
+    // the projected point cloud), no other label, not the active card and not off-screen. Leaders stay short. A
+    // label keeps its spot until another one is clearly better, so labels don't jump around as the model moves.
+    const live = shown.filter(d => d.on), small = layout.row, LW = small ? 108 : 210;
+    const cardEl = steps[active]?.querySelector('.step-card'), cr = cardEl?.getBoundingClientRect(), sr = canvas.getBoundingClientRect();
+    const card = cr && cr.width ? [cr.left - sr.left, cr.top - sr.top, cr.right - sr.left, cr.bottom - sr.top] : null;
     if (live.length) {
       const vis = new Map();
       for (let i = 0; i < cloud.length; i++) {
@@ -424,33 +419,46 @@ async function init() {
         v.copy(cloud[i][1]).applyMatrix4(m.matrixWorld).project(camera); cloudX[i] = (v.x + 1) / 2 * w; cloudY[i] = (1 - v.y) / 2 * h;
       }
     }
-    for (const d of live) {
-      if (!d.h) { d.el.style.width = LW + 'px'; d.h = d.el.offsetHeight; d.mid = d.el.firstChild.offsetHeight / 2; }
-      let edge = d.ax;
-      for (let i = 0; i < cloud.length; i++) {
-        if (Math.abs(cloudY[i] - d.ay) < 46) edge = side > 0 ? Math.max(edge, cloudX[i]) : Math.min(edge, cloudX[i]);
+    const overlap = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+    const placed = [];
+    const DIRS = [[1, -1], [-1, -1], [1, 1], [-1, 1], [1, 0], [-1, 0], [0, -1], [0, 1]];
+    for (const d of live.sort((p, q) => p.ay - q.ay)) {
+      d.el.classList.toggle('compact', small);
+      if (!d.h || d.small !== small) { d.el.style.width = LW + 'px'; d.h = d.el.offsetHeight; d.small = small; }
+      let best = null;
+      for (const R of small ? [30, 60, 95, 130] : [44, 100, 160, 230]) for (let k = 0; k < DIRS.length; k++) {
+        const [dx, dy] = DIRS[k], n = Math.hypot(dx, dy), px = d.ax + dx / n * R, py = d.ay + dy / n * R;
+        const x = dx < 0 ? px - LW : dx > 0 ? px : px - LW / 2, y = dy < 0 ? py - d.h : dy > 0 ? py : py - d.h / 2;
+        const box = [x, y, x + LW, y + d.h];
+        let cost = R * 0.4;
+        // the leader runs from the part to the nearest point of the label; it may cross the model a little
+        const ex = Math.min(Math.max(d.ax, box[0]), box[2]) - d.ax, ey = Math.min(Math.max(d.ay, box[1]), box[3]) - d.ay, ll = ex * ex + ey * ey || 1;
+        for (let i = 0; i < cloud.length; i++) {
+          const cx = cloudX[i], cy = cloudY[i];         // a little clearance around the text, too
+          if (cx >= box[0] - 10 && cx <= box[2] + 10 && cy >= box[1] - 8 && cy <= box[3] + 8) { cost += 4; continue; }
+          const u = Math.min(1, Math.max(0, ((cx - d.ax) * ex + (cy - d.ay) * ey) / ll));
+          if (u > 0.25 && Math.hypot(cx - d.ax - u * ex, cy - d.ay - u * ey) < 5) cost += 1;
+        }
+        for (const b of placed) cost += overlap(box, b) * 0.5;
+        if (card) cost += overlap(box, [card[0] - 12, card[1] - 12, card[2] + 12, card[3] + 12]) * 0.5;
+        cost += (Math.max(0, 12 - box[0]) + Math.max(0, box[2] - (w - (small ? 12 : 48))) + Math.max(0, (small ? 64 : 56) - box[1]) + Math.max(0, box[3] - (h - 12))) * 40;
+        const key = R * 10 + k;
+        if (key === d.key) cost -= 60;                       // stickiness: stay unless clearly better elsewhere
+        if (!best || cost < best.cost) best = { cost, key, box, dx };
       }
-      d.side = side;
-      d.tx = THREE.MathUtils.clamp(side > 0 ? edge + 24 : edge - 24 - LW, 16, w - 40 - LW);
-      d.ty = d.ay - d.mid;
-    }
-    for (const s of [-1, 1]) {           // no overlaps within a side: push down in order, then back up if off-screen
-      const col = live.filter(d => d.side === s).sort((p, q) => p.ty - q.ty);
-      let prev = -Infinity;
-      for (const d of col) { d.ty = Math.max(d.ty, prev + GAP, h * 0.08); prev = d.ty + d.h; }
-      let next = h * 0.94;
-      for (let i = col.length - 1; i >= 0; i--) { const d = col[i]; d.ty = Math.min(d.ty, next - d.h); next = d.ty - GAP; }
+      d.key = best.key; d.tx = best.box[0]; d.ty = best.box[1]; d.flip = best.dx < 0;
+      placed.push(best.box);
     }
     for (const d of shown) {
       d.el.style.opacity = d.a; d.g.style.opacity = d.a;
-      if (!d.on) continue;
+      if (!d.on) continue;                                    // fading out: stays exactly where it was
       const snap = d.x == null || frozen;
-      d.x = snap ? d.tx : damp(d.x, d.tx, 8, dt); d.y = snap ? d.ty : damp(d.y, d.ty, 8, dt);
-      const ly = d.y + d.mid, ex = d.side > 0 ? d.x - 8 : d.x + LW + 8, kx = ex - d.side * 16;
-      d.el.classList.toggle('flip', d.side < 0);
-      if (d.el.firstChild.dataset.n) { delete d.el.firstChild.dataset.n; d.num.textContent = ''; d.dots[0].setAttribute('r', 8); d.dots[1].setAttribute('r', 4); }
+      d.x = snap ? d.tx : damp(d.x, d.tx, 7, dt); d.y = snap ? d.ty : damp(d.y, d.ty, 7, dt);
+      d.el.classList.toggle('flip', d.flip);
       d.el.style.transform = `translate(${d.x.toFixed(1)}px, ${d.y.toFixed(1)}px)`;
-      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${kx.toFixed(1)},${ly.toFixed(1)} ${ex.toFixed(1)},${ly.toFixed(1)}`);
+      // leader: from the part to the nearest point of the label, stopping just short of the text
+      const ex = Math.min(Math.max(d.ax, d.x - 6), d.x + LW + 6), ey = Math.min(Math.max(d.ay, d.y + 9), d.y + d.h - 6);
+      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`);
       for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
     }
   }

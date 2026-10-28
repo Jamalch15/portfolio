@@ -54,7 +54,7 @@
     </div>
     <ol>
       <li><a href="#ares-4"><span class="thumb" style="background-image:url(assets/ares4-arm.jpg)"></span><span class="txt"><span class="label n">01 · DTU</span><span class="t">ARES-4 modular 4-DOF robot arm</span><span class="res"><b>48 / 50</b> bricks sorted in the final test</span></span></a></li>
-      <li><a href="#cycloidal"><span class="thumb light" style="background-image:url(assets/qdd-thumb.jpg)"></span><span class="txt"><span class="label n">02 · Independent</span><span class="t">Cycloidal QDD actuator</span><span class="res"><b>CAD complete</b> 15:1 design, first prototype printed</span></span></a></li>
+      <li><a href="#cycloidal"><span class="thumb light" style="background-image:url(assets/qdd-thumb.jpg)"></span><span class="txt"><span class="label n">02 · Independent</span><span class="t">Cycloidal QDD actuator</span><span class="res"><b>In progress</b> CAD complete: a 15:1 design, first prototype printed</span></span></a></li>
       <li><a href="#qr-scanner"><span class="thumb light" style="background-image:url(assets/qr-v1-cad.jpg)"></span><span class="txt"><span class="label n">03 · Association</span><span class="t">Wall-mounted QR scanner</span><span class="res"><b>V2</b> in use every week</span></span></a></li>
       <li><a href="#syringe-pump"><span class="thumb" style="background-image:url(assets/pump-prototype.jpg)"></span><span class="txt"><span class="label n">04 · DTU</span><span class="t">Motor-driven syringe pump</span><span class="res"><b>99–101 %</b> of the set flow</span></span></a></li>
     </ol>
@@ -97,13 +97,14 @@
         <div class="ares3d-stage">
           <canvas role="img" aria-label="Interactive 3D model of ARES-4, rebuilt from the SolidWorks assembly"></canvas>
           <div class="ares3d-labels" aria-hidden="true"></div>
+          <a class="skip3d tour" href="#ares-decisions">Skip the 3D tour</a>
           <div class="ares3d-dots" aria-label="Steps"></div>
           <span class="ares3d-note">3D model from the original SolidWorks assembly · scroll, or drag to orbit</span>
         </div>
         <div class="ares3d-steps">
           <div class="ares3d-step right"><div class="step-card"><span class="step-no">01</span><span class="label">ARES-4</span><h3>Four joints, each its own module</h3><p>Printed joint adapters on 2020 aluminium links, so <b>any joint can be changed on its own</b>, and a tool interface at the wrist that takes a <b>gripper or an electromagnet</b>.</p><dl class="step-meta"><div><dt>4</dt><dd>joints</dd></div><div><dt>≈500 mm</dt><dd>reach</dd></div><div><dt>≈500 g</dt><dd>payload</dd></div></dl></div></div>
           <div class="ares3d-step"><div class="step-card"><span class="step-no">02</span><span class="label">Base and shoulder</span><h3>Strong enough at full reach</h3><p>Fully stretched out and accelerating, the arm needs <b>about 4 Nm</b> at the shoulder. A stepper with a 27:1 gearbox gives <b>about 7 Nm peak</b>, and our own torque test confirmed it.</p><dl class="step-meta"><div><dt>≈4 Nm</dt><dd>needed</dd></div><div><dt>≈7 Nm</dt><dd>peak</dd></div><div><dt>27 : 1</dt><dd>gearbox</dd></div></dl></div></div>
-          <div class="ares3d-step right"><div class="step-card"><span class="step-no">03</span><span class="label">Elbow and wrist</span><h3>Light up top, strong at the base</h3><p><b>Servos at the elbow and wrist</b> keep the mass close to the base, so the steppers only carry what they must and the arm stays quick.</p><dl class="step-meta"><div><dt>2 × DS3240</dt><dd>servos</dd></div><div><dt>2020</dt><dd>aluminium links</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">03</span><span class="label">Elbow and wrist</span><h3>Light up top, strong at the base</h3><p><b>Servos at the elbow and wrist</b> keep the mass close to the base, so the steppers only carry what they must and the arm stays quick.</p><dl class="step-meta"><div><dt>≈3.9 Nm</dt><dd>rated, per servo</dd></div><div><dt>2</dt><dd>servos: elbow and wrist</dd></div></dl></div></div>
           <div class="ares3d-step"><div class="step-card"><span class="step-no">04</span><span class="label">Tools</span><h3>Swap tools by hand</h3><p>Twist the gripper off its knurled ring and it lifts away. Push the next tool on and twist to lock: lugs catch under the lip and a <b>sideways pogo connector</b> closes, so power reaches the tool <b>without a cable or a screwdriver</b>.</p><dl class="step-meta"><div><dt>2</dt><dd>tools: gripper, electromagnet</dd></div><div><dt>No tools</dt><dd>needed for a swap</dd></div></dl></div></div>
           <div class="ares3d-step right"><div class="step-card"><span class="step-no">05</span><span class="label">Result</span><h3>Sorting on its own</h3><p>The camera finds a brick, inverse kinematics plans the pick, the parallel jaws close on it and the arm drops it in its bin, then <b>repeats until the table is clear</b>, with no one touching it.</p><dl class="step-meta"><div><dt>48 / 50</dt><dd>sorted in the test</dd></div><div><dt>96 %</dt><dd>success rate</dd></div></dl></div></div>
         </div>
@@ -157,7 +158,7 @@
         <span class="num">02</span>
         <h2>Cycloidal QDD Actuator</h2>
         <div class="meta">
-          <span class="chip status design">In development</span>
+          <span class="chip status design">In progress · CAD complete</span>
           <span class="ctx">Independent project</span>
         </div>
       </div>
@@ -172,7 +173,7 @@
       <div class="brief">
         <div class="card"><span class="label">Problem</span><p>A backdrivable, controllable actuator for robotics: light, compact and 3D-printable on a home FDM printer, with as few off-the-shelf parts as possible and a low cost.</p></div>
         <div class="card"><span class="label">My role</span><p>Independent project: concept, calculations, all of the SolidWorks design, printing and fitting the parts.</p></div>
-        <div class="card result"><span class="label">Status</span><span class="big">CAD complete</span><p>A <b>15:1 design</b>. The first prototype was <b>printed and fitted with real bearings</b>; the design shown here is complete in CAD. Next: fit samples, assembly and hand-turn tests.</p></div>
+        <div class="card result"><span class="label">Status</span><span class="big">In progress</span><p>The current <b>15:1 design is complete in CAD</b>. The first prototype was <b>printed and fitted with real bearings</b>. Next: fit samples, assembly and hand-turn tests.</p></div>
       </div>
 
       <a class="skip3d" href="#cycloidal-decisions">Skip the 3D tour</a>
@@ -181,14 +182,15 @@
         <div class="ares3d-stage">
           <canvas role="img" aria-label="Interactive 3D model of the cycloidal actuator, built from the original SolidWorks assembly"></canvas>
           <div class="ares3d-labels" aria-hidden="true"></div>
+          <a class="skip3d tour" href="#cycloidal-decisions">Skip the 3D tour</a>
           <div class="qdd-hud" aria-hidden="true"><span>Input <b data-in>0.0</b> turns</span><span class="out">Output <b data-out>0.00</b> turns</span></div>
           <div class="ares3d-dots" aria-label="Steps"></div>
           <span class="ares3d-note">3D model from the original SolidWorks assembly · scroll, or drag to orbit</span>
         </div>
         <div class="ares3d-steps">
-          <div class="ares3d-step"><div class="step-card"><span class="step-no">01</span><span class="label">The actuator</span><h3>A 15:1 cycloid for a drone motor</h3><p>A <b>15:1 cycloidal stage</b> in a printed housing, sized for a <b>T-Motor MN6007 II</b> outrunner. The ratio is low on purpose: the aim is a joint that stays <b>backdrivable</b> and quick to respond.</p><dl class="step-meta"><div><dt>15 : 1</dt><dd>reduction</dd></div><div><dt>MN6007 II</dt><dd>outrunner motor</dd></div><div><dt>FOC</dt><dd>control, planned</dd></div></dl></div></div>
-          <div class="ares3d-step right"><div class="step-card"><span class="step-no">02</span><span class="label">Inside</span><h3>Printed, with a few bought parts</h3><p>Almost everything you see is <b>designed to be printed at home</b>, around a few bought parts such as the motor and the bearings.</p><dl class="step-meta"><div><dt>2</dt><dd>cycloidal discs</dd></div><div><dt>3-piece</dt><dd>eccentric shaft</dd></div><div><dt>5</dt><dd>output pins</dd></div></dl></div></div>
-          <div class="ares3d-step"><div class="step-card"><span class="step-no">03</span><span class="label">The cycloid</span><h3>Fifteen turns in, one turn out</h3><p>The eccentric shaft swings both discs around the lobed housing. Each input turn walks a disc back by <b>one lobe</b>, so the output turns <b>once for every 15</b> turns of the motor.</p><dl class="step-meta"><div><dt>2 mm</dt><dd>eccentricity</dd></div><div><dt>15</dt><dd>lobes per disc</dd></div><div><dt>180°</dt><dd>between the discs</dd></div></dl></div></div>
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">01</span><span class="label">The actuator</span><h3>A 15:1 cycloid for a drone motor</h3><p>A <b>15:1 cycloidal stage</b> in a printed housing, sized for a <b>T-Motor MN6007 II</b> outrunner. The ratio is low on purpose: the aim is a joint that stays <b>backdrivable</b> and quick to respond.</p><dl class="step-meta"><div><dt>≈16 Nm</dt><dd>peak torque, design target</dd></div><div><dt>≈470 rpm</dt><dd>top speed, design target</dd></div><div><dt>15 : 1</dt><dd>reduction</dd></div></dl></div></div>
+          <div class="ares3d-step right"><div class="step-card"><span class="step-no">02</span><span class="label">Inside</span><h3>Printed, with a few bought parts</h3><p>Almost everything you see is <b>designed to be printed at home</b>, around a few bought parts such as the motor and the bearings.</p><dl class="step-meta"><div><dt>Bought</dt><dd>only the motor, bearings and screws</dd></div><div><dt>Printed</dt><dd>everything else</dd></div></dl></div></div>
+          <div class="ares3d-step"><div class="step-card"><span class="step-no">03</span><span class="label">The cycloid</span><h3>Fifteen turns in, one turn out</h3><p>The eccentric shaft swings both discs around the lobed housing. Each input turn walks a disc back by <b>one lobe</b>, so the output turns <b>once for every 15</b> turns of the motor.</p><dl class="step-meta"><div><dt>15 → 1</dt><dd>turns in per turn out</dd></div><div><dt>Low</dt><dd>backlash, by design</dd></div><div><dt>Balanced</dt><dd>discs half a turn apart</dd></div></dl></div></div>
           <div class="ares3d-step right"><div class="step-card"><span class="step-no">04</span><span class="label">Status</span><h3>From printed prototype to current design</h3><p>The first prototype was <b>printed and fitted with real bearings</b> to check fits against the CAD. This design builds on it; next come <b>fit samples, assembly and hand-turn tests</b>.</p><dl class="step-meta"><div><dt>Printed</dt><dd>first prototype</dd></div><div><dt>Complete</dt><dd>current design, in CAD</dd></div></dl></div></div>
         </div>
       </div>

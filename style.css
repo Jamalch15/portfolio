@@ -243,21 +243,20 @@ footer .cta { justify-content: flex-end; }
 .ares3d-leaders polyline { fill: none; stroke: var(--signal); stroke-width: 1.25; }
 .ares3d-leaders circle { fill: var(--signal); }
 .ares3d-leaders circle.halo { fill: rgba(232,137,47,.22); }
-.ares3d-leaders text.n { fill: #1b1006; font: 700 11px/1 system-ui, sans-serif; }
-.ares3d-label b[data-n] { display: flex; gap: 6px; align-items: flex-start; }
-.ares3d-label b[data-n]::before { content: attr(data-n); flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; background: var(--signal); color: #1b1006; font-size: 11px; line-height: 1; }
 .ares3d-label { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
 .ares3d-label b { display: block; color: #fff; font-size: 16px; font-weight: 700; line-height: 22px; }
 .ares3d-label span { display: block; margin-top: 3px; color: var(--mist); font-size: 13.5px; line-height: 1.45; }
 .ares3d-label.flip { text-align: right; }
+.ares3d-label b, .ares3d-label span { text-shadow: 0 1px 2px rgba(8,18,23,.9), 0 0 12px rgba(8,18,23,.6); }
+.qdd3d .ares3d-label b, .qdd3d .ares3d-label span { text-shadow: 0 0 2px #fff, 0 0 10px rgba(255,255,255,.9); }
 .ares3d-label.big b { font-size: 36px; line-height: 40px; color: var(--signal); }
 .ares3d-steps { position: relative; margin-top: -100vh; pointer-events: none; }
 /* scroll steps: a card per step, alternating sides; the active card slides in, the rest fade back */
 .ares3d-step { --dir: -1; min-height: 82vh; display: flex; align-items: center; padding: 0 max(28px, calc(50vw - 600px)); }
 .ares3d-step.right { --dir: 1; justify-content: flex-end; }
 .step-card { position: relative; width: min(460px, 100%); padding: 34px 34px 30px; border-radius: 18px; pointer-events: auto;
-  background: linear-gradient(150deg, rgba(20,44,56,.82), rgba(11,26,33,.72)); border: 1px solid rgba(127,167,187,.22);
-  box-shadow: 0 30px 60px rgba(0,0,0,.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(150deg, rgba(20,44,56,.94), rgba(11,26,33,.9)); border: 1px solid rgba(127,167,187,.22);
+  box-shadow: 0 30px 60px rgba(0,0,0,.35);   /* no backdrop blur: over a live WebGL canvas it costs a full re-blur every frame */
   transition: opacity .7s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
 .step-card::before { content: ""; position: absolute; left: 34px; top: 0; width: 56px; height: 3px; border-radius: 0 0 3px 3px; background: var(--signal); }
 /* cards stay readable until the scene is running; then inactive ones step back and the active one slides in */
@@ -292,9 +291,16 @@ footer .cta { justify-content: flex-end; }
 .ares3d-static .step-no, html:not(.js) .step-no { top: -30px; font-size: 60px; }
 .skip3d { display: inline-block; margin-top: 26px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--signal); text-decoration: none; border-bottom: 1px solid currentColor; }
 .dark .skip3d { color: var(--signal); }
+/* the same link stays on screen for the whole tour */
+.skip3d:has(+ .ares3d-ready) { display: none; }
+.skip3d.tour { position: absolute; left: 24px; bottom: 18px; z-index: 3; margin: 0; padding: 7px 14px; border: 1px solid rgba(232,137,47,.55); border-radius: 999px;
+  background: rgba(11,26,33,.72); }
+.skip3d.tour::after { content: " ↓"; }
+.skip3d.tour:hover, .skip3d.tour:focus-visible { background: var(--signal); color: #1b1006; }
+.qdd3d .skip3d.tour { background: rgba(255,255,255,.85); color: var(--signal-ink); border-color: rgba(160,86,13,.4); }
 /* light variant for the cycloidal drive (white section) */
 .qdd3d .ares3d-stage { background: radial-gradient(ellipse 58% 40% at 60% 52%, #e6edf1 0%, rgba(230,237,241,0) 100%) var(--paper); }
-.qdd3d .step-card { background: linear-gradient(150deg, rgba(255,255,255,.9), rgba(246,249,251,.82)); border-color: var(--rule); box-shadow: 0 30px 60px rgba(25,55,71,.14); }
+.qdd3d .step-card { background: linear-gradient(150deg, rgba(255,255,255,.97), rgba(246,249,251,.95)); border-color: var(--rule); box-shadow: 0 30px 60px rgba(25,55,71,.14); }
 .qdd3d .step-no { -webkit-text-stroke-color: rgba(41,79,98,.28); }
 .qdd3d .step-card h3, .qdd3d .step-meta dt { color: var(--navy); }
 .qdd3d .step-card p { color: #3e4c55; }
@@ -337,7 +343,8 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .lead-media.pair figure:first-child img { aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 0; }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .gallery.center > figure { width: calc(50% - 7px); }
-  .qdd-hud { bottom: auto; top: 14px; gap: 16px; padding: 8px 14px; }
+  .qdd-hud { bottom: auto; top: 58px; gap: 16px; padding: 8px 14px; }
+  .skip3d.tour { left: auto; right: 12px; bottom: auto; top: 14px; padding: 6px 12px; font-size: 12px; }
   .ares3d-step, .ares3d-step.right { align-items: flex-end; justify-content: center; padding: 0 12px 4vh; }
   .step-card { width: 100%; padding: 22px 20px 18px; border-radius: 14px; }
   .ares3d-ready .ares3d-step .step-card { transform: translateY(24px); }
