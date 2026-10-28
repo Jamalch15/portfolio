@@ -50,7 +50,8 @@ async function init() {
   if (!webglOK() || reduced) { section.classList.add('ares3d-static'); return; }
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const phone = innerWidth < 760;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, phone ? 1.5 : 2));    // lighter on phones
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -61,7 +62,7 @@ async function init() {
   scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
   const camera = new THREE.PerspectiveCamera(30, 1, 0.005, 10);
   const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(0.5, 1.4, 0.7);
-  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0003; key.shadow.radius = 6;
+  key.castShadow = true; key.shadow.mapSize.set(phone ? 1024 : 2048, phone ? 1024 : 2048); key.shadow.bias = -0.0003; key.shadow.radius = 6;
   Object.assign(key.shadow.camera, { left: -0.2, right: 0.2, top: 0.2, bottom: -0.2, near: 0.1, far: 3 });
   scene.add(key);
   scene.add(new THREE.HemisphereLight(0xffffff, 0xc9d3d9, 0.7));
@@ -164,9 +165,9 @@ async function init() {
     el.className = 'ares3d-label' + (name === 'ratio' ? ' big' : '');
     el.innerHTML = `<b>${LABELS[name][0]}</b><span>${LABELS[name][1]}</span>`;
     const g = document.createElementNS(SVG, 'g');
-    g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/>';
+    g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/><text class="n" text-anchor="middle" dy="3.6"></text>';
     labelLayer.appendChild(el); leaders.appendChild(g);
-    o.userData = { el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0 };
+    o.userData = { el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), num: g.querySelector('text'), a: 0, y: null, h: 0 };
     anchors[name] = o;
   }
   const layout = { row: false, colX: 0, colW: 0, yMin: 0, yMax: 0 };
@@ -178,7 +179,7 @@ async function init() {
                 fades: rig.order.map(name => KEYS[active].hide.includes(name) ? 0 : 1) };
   let theta = 0, theta0 = 0, orbit = 0, drag = 0, dragVel = 0, dragging = false, lastX = 0;
   const dots = steps.map((s, i) => {
-    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Step ${i + 1}`);
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Step ${i + 1}: ${s.querySelector('h3')?.textContent ?? ''}`);
     b.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     dotsEl?.appendChild(b); return b;
   });
@@ -186,7 +187,7 @@ async function init() {
     if (fixedStep !== null || i < 0 || i === active) return;
     active = i; theta0 = theta;                    // turn counters start from zero on each step
     steps.forEach((s, k) => s.classList.toggle('active', k === i));
-    dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    dots.forEach((d, k) => { d.classList.toggle('on', k === i); d.toggleAttribute('aria-current', k === i); });
   }
   // the active step is the one under the middle of the screen, measured every frame (scroll events can be skipped)
   function pickStep() {
@@ -279,16 +280,19 @@ async function init() {
     if (layout.row) {
       // narrow: one row along the top, in the anchors' left-to-right order; leaders drop to the parts
       const live = shown.filter(d => d.on).sort((p, q) => p.ax - q.ax);
-      const x0 = 16, cw = (w - x0 - 44) / Math.max(1, live.length), top = k.hud ? 64 : 58;
+      const x0 = 16, cw = (w - x0 - 12) / Math.max(1, live.length), top = k.hud ? 64 : 58;
       for (const d of shown) { d.el.style.opacity = d.a; d.g.style.opacity = d.a; }   // fading ones stay where they were
       live.forEach((d, i) => {
         d.el.classList.toggle('compact', live.length > 3);   // four in a row: titles only
+        // phones: a numbered dot on the part and the same number on its label, no leader lines to cross
         d.el.style.width = (cw - 12) + 'px';
-        const x = x0 + i * cw, bottom = top + d.el.offsetHeight;
+        d.el.firstChild.dataset.n = i + 1; d.num.textContent = i + 1;
         d.el.classList.remove('flip');
-        d.el.style.transform = `translate(${x.toFixed(1)}px, ${top}px)`;
-        d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${(x + 1).toFixed(1)},${(bottom + 14).toFixed(1)} ${(x + 1).toFixed(1)},${(bottom + 4).toFixed(1)}`);
+        d.el.style.transform = `translate(${(x0 + i * cw).toFixed(1)}px, ${top}px)`;
+        d.line.setAttribute('points', '');
+        d.dots[0].setAttribute('r', 13); d.dots[1].setAttribute('r', 9);
         for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
+        d.num.setAttribute('x', d.ax.toFixed(1)); d.num.setAttribute('y', d.ay.toFixed(1));
       });
       return;
     }
@@ -329,6 +333,7 @@ async function init() {
       d.x = snap ? d.tx : damp(d.x, d.tx, 8, dt); d.y = snap ? d.ty : damp(d.y, d.ty, 8, dt);
       const ly = d.y + d.mid, ex = d.side > 0 ? d.x - 8 : d.x + LW + 8, kx = ex - d.side * 16;
       d.el.classList.toggle('flip', d.side < 0);
+      if (d.el.firstChild.dataset.n) { delete d.el.firstChild.dataset.n; d.num.textContent = ''; d.dots[0].setAttribute('r', 8); d.dots[1].setAttribute('r', 4); }
       d.el.style.transform = `translate(${d.x.toFixed(1)}px, ${d.y.toFixed(1)}px)`;
       d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${kx.toFixed(1)},${ly.toFixed(1)} ${ex.toFixed(1)},${ly.toFixed(1)}`);
       for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
@@ -342,4 +347,9 @@ async function init() {
   requestAnimationFrame(loop);
 }
 
-init().catch(err => { console.error(err); section?.classList.add('ares3d-static'); });
+// Load three.js work only when the section is about 1.5 screens away, so it doesn't compete with the page above.
+const start = () => init().catch(err => { console.error(err); section?.classList.add('ares3d-static'); });
+if (section && 'IntersectionObserver' in window) {
+  const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); start(); } }, { rootMargin: '150% 0px' });
+  near.observe(section);
+} else start();

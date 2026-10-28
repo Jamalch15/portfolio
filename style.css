@@ -18,6 +18,7 @@
   --panel: #f3f5f7;
   --paper: #ffffff;
   --signal: #e8892f;
+  --signal-ink: #a0560d;   /* orange for small text on light backgrounds (AA contrast) */
   --ok: #3f8f6b;
   --radius: 10px;
   --wrap: 1180px;
@@ -86,7 +87,7 @@ img, video { display: block; max-width: 100%; height: auto; }
 .index .thumb { display: block; aspect-ratio: 4 / 3; background: #0e1a20 center / cover no-repeat; border-bottom: 1px solid var(--rule); }
 .index .thumb.light { background-color: #fff; background-size: contain; }
 .index .txt { display: flex; flex-direction: column; flex: 1; padding: 16px 18px 18px; }
-.index .n { color: var(--signal); }
+.index .n { color: var(--signal-ink); }
 .index .res { display: block; min-height: 82px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 13.5px; line-height: 1.4; color: var(--muted); }
 .index .res b { display: block; margin-bottom: 2px; font-size: 24px; line-height: 1.15; color: var(--navy); font-weight: 720; }
 .index .t { display: block; font-weight: 650; font-size: 17px; line-height: 1.3; margin: 6px 0 18px; color: var(--navy); }
@@ -116,7 +117,7 @@ img, video { display: block; max-width: 100%; height: auto; }
 .chip.status { font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 11.5px; }
 .chip.done { color: var(--ok); border-color: currentColor; }
 .chip.use { color: var(--bar); border-color: currentColor; }
-.chip.design { color: var(--signal); border-color: currentColor; }
+.chip.design { color: var(--signal-ink); border-color: currentColor; }
 .dark .chip.done { color: #7fd3a8; }
 
 .lede { margin: 22px 0 0; font-size: 19px; line-height: 1.5; max-width: 52em; color: var(--muted); }
@@ -135,15 +136,15 @@ img, video { display: block; max-width: 100%; height: auto; }
 .iter-step { position: relative; padding: 22px 22px 20px; border-radius: var(--radius); background: #fff; border: 1px solid var(--rule); }
 .iter-step figure { margin: 6px 0 12px; }
 .iter-step img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #fff; border-radius: 8px; }
-.iter-k { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--signal); }
-.iter-step h4 { margin: 6px 0 0; font-size: 20px; line-height: 1.25; color: var(--navy); }
+.iter-k { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--signal-ink); }
+.iter-step h3 { margin: 6px 0 0; font-size: 20px; line-height: 1.25; color: var(--navy); }
 .iter-step p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--muted); }
 .iter-step p b { color: var(--navy); }
 .iter-step ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .iter-step li { position: relative; padding-left: 22px; font-size: 15px; line-height: 1.4; }
 .iter-step li::before { content: ""; position: absolute; left: 2px; top: .45em; width: 9px; height: 5px; border-left: 2px solid var(--signal); border-bottom: 2px solid var(--signal); transform: rotate(-45deg); }
 .iter-step.v2 { background: var(--navy); border-color: var(--navy); color: #e6eef2; box-shadow: 0 24px 48px rgba(25,55,71,.22); }
-.iter-step.v2 h4 { color: #fff; }
+.iter-step.v2 h3 { color: #fff; }
 .iter-step.v2 .iter-k { color: var(--signal); }
 .iter-foot { margin-top: 16px !important; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.18); color: #fff !important; font-weight: 600; }
 .iter-arrow { position: relative; }
@@ -188,6 +189,8 @@ figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; cursor: zoom-in; background: #fff; transition: transform .2s; }
 .gallery img.fit { object-fit: contain; padding: 6px; }
+.gallery.center { display: flex; flex-wrap: wrap; justify-content: center; }   /* a short last row sits centred */
+.gallery.center > figure { width: calc(25% - 10.5px); }
 .gallery img:hover { transform: scale(1.02); }
 
 .demo { margin-top: 44px; display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: center; }
@@ -240,6 +243,9 @@ footer .cta { justify-content: flex-end; }
 .ares3d-leaders polyline { fill: none; stroke: var(--signal); stroke-width: 1.25; }
 .ares3d-leaders circle { fill: var(--signal); }
 .ares3d-leaders circle.halo { fill: rgba(232,137,47,.22); }
+.ares3d-leaders text.n { fill: #1b1006; font: 700 11px/1 system-ui, sans-serif; }
+.ares3d-label b[data-n] { display: flex; gap: 6px; align-items: flex-start; }
+.ares3d-label b[data-n]::before { content: attr(data-n); flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; background: var(--signal); color: #1b1006; font-size: 11px; line-height: 1; }
 .ares3d-label { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; }
 .ares3d-label b { display: block; color: #fff; font-size: 16px; font-weight: 700; line-height: 22px; }
 .ares3d-label span { display: block; margin-top: 3px; color: var(--mist); font-size: 13.5px; line-height: 1.45; }
@@ -247,16 +253,19 @@ footer .cta { justify-content: flex-end; }
 .ares3d-label.big b { font-size: 36px; line-height: 40px; color: var(--signal); }
 .ares3d-steps { position: relative; margin-top: -100vh; pointer-events: none; }
 /* scroll steps: a card per step, alternating sides; the active card slides in, the rest fade back */
-.ares3d-step { --dir: -1; min-height: 100vh; display: flex; align-items: center; padding: 0 max(28px, calc(50vw - 600px)); }
+.ares3d-step { --dir: -1; min-height: 82vh; display: flex; align-items: center; padding: 0 max(28px, calc(50vw - 600px)); }
 .ares3d-step.right { --dir: 1; justify-content: flex-end; }
 .step-card { position: relative; width: min(460px, 100%); padding: 34px 34px 30px; border-radius: 18px; pointer-events: auto;
   background: linear-gradient(150deg, rgba(20,44,56,.82), rgba(11,26,33,.72)); border: 1px solid rgba(127,167,187,.22);
   box-shadow: 0 30px 60px rgba(0,0,0,.35); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  opacity: 0; transform: translateX(calc(var(--dir) * 48px)); transition: opacity .7s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+  transition: opacity .7s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
 .step-card::before { content: ""; position: absolute; left: 34px; top: 0; width: 56px; height: 3px; border-radius: 0 0 3px 3px; background: var(--signal); }
-.ares3d-step.active .step-card { opacity: 1; transform: none; }
-.step-card > * { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
-.ares3d-step.active .step-card > * { opacity: 1; transform: none; }
+/* cards stay readable until the scene is running; then inactive ones step back and the active one slides in */
+.ares3d-ready .ares3d-step .step-card { opacity: 0; transform: translateX(calc(var(--dir) * 48px)); }
+.ares3d-ready .ares3d-step.active .step-card { opacity: 1; transform: none; }
+.step-card > * { transition: opacity .6s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.ares3d-ready .ares3d-step .step-card > * { opacity: 0; transform: translateY(12px); }
+.ares3d-ready .ares3d-step.active .step-card > * { opacity: 1; transform: none; }
 .ares3d-step.active .step-card > :nth-child(2) { transition-delay: .08s; }
 .ares3d-step.active .step-card > :nth-child(3) { transition-delay: .16s; }
 .ares3d-step.active .step-card > :nth-child(4) { transition-delay: .24s; }
@@ -270,7 +279,19 @@ footer .cta { justify-content: flex-end; }
 .step-meta div { min-width: 0; }
 .step-meta dt { font-size: 22px; font-weight: 750; line-height: 1.1; color: #fff; }
 .step-meta dd { margin: 3px 0 0; font-size: 13px; color: var(--steel); }
-.ares3d-static { display: none; }
+.ares3d-still { display: none; margin: 0; }
+/* no WebGL, reduced motion, a failed load or no JavaScript: a still and the cards, as normal content */
+.ares3d-static, html:not(.js) .ares3d { width: auto; margin: 28px 0 0; }
+.ares3d-static .ares3d-stage, html:not(.js) .ares3d-stage { display: none; }
+.ares3d-static .ares3d-still, html:not(.js) .ares3d-still { display: block; }
+.ares3d-still img { width: 100%; max-height: 520px; object-fit: contain; border-radius: var(--radius); }
+.ares3d-static .ares3d-steps, html:not(.js) .ares3d-steps { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.ares3d-static .ares3d-step, html:not(.js) .ares3d-step { min-height: 0; padding: 0; display: block; }
+.ares3d.ares3d-static .ares3d-step .step-card, html:not(.js) .step-card { width: auto; height: 100%; opacity: 1; transform: none; }
+.ares3d.ares3d-static .ares3d-step .step-card > * { opacity: 1; transform: none; }
+.ares3d-static .step-no, html:not(.js) .step-no { top: -30px; font-size: 60px; }
+.skip3d { display: inline-block; margin-top: 26px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--signal); text-decoration: none; border-bottom: 1px solid currentColor; }
+.dark .skip3d { color: var(--signal); }
 /* light variant for the cycloidal drive (white section) */
 .qdd3d .ares3d-stage { background: radial-gradient(ellipse 58% 40% at 60% 52%, #e6edf1 0%, rgba(230,237,241,0) 100%) var(--paper); }
 .qdd3d .step-card { background: linear-gradient(150deg, rgba(255,255,255,.9), rgba(246,249,251,.82)); border-color: var(--rule); box-shadow: 0 30px 60px rgba(25,55,71,.14); }
@@ -278,6 +299,7 @@ footer .cta { justify-content: flex-end; }
 .qdd3d .step-card h3, .qdd3d .step-meta dt { color: var(--navy); }
 .qdd3d .step-card p { color: #3e4c55; }
 .qdd3d .step-card p b { color: var(--navy); }
+.qdd3d .step-card .label { color: var(--signal-ink); }
 .qdd3d .step-meta { border-top-color: var(--rule); }
 .qdd3d .step-meta dd { color: var(--muted); }
 .qdd3d .ares3d-label b { color: var(--navy); }
@@ -314,9 +336,12 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .iter-arrow::after { left: calc(50% - 5px); right: auto; top: auto; bottom: 6px; transform: rotate(135deg); }
   .lead-media.pair figure:first-child img { aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 0; }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .gallery.center > figure { width: calc(50% - 7px); }
   .qdd-hud { bottom: auto; top: 14px; gap: 16px; padding: 8px 14px; }
   .ares3d-step, .ares3d-step.right { align-items: flex-end; justify-content: center; padding: 0 12px 4vh; }
-  .step-card { width: 100%; padding: 22px 20px 18px; border-radius: 14px; transform: translateY(24px); }
+  .step-card { width: 100%; padding: 22px 20px 18px; border-radius: 14px; }
+  .ares3d-ready .ares3d-step .step-card { transform: translateY(24px); }
+  .ares3d-dots { display: none; }
   .step-card::before { left: 20px; }
   .step-no { font-size: 50px; right: 14px; top: -28px; }
   .step-card h3 { font-size: 23px; max-width: 13em; }
@@ -338,7 +363,7 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
 }
 @media (max-width: 520px) {
   .toolkit { display: grid; gap: 8px; }
-  .toolkit div { display: grid; grid-template-columns: 104px 1fr; align-items: baseline; border-right: 0; margin-right: 0; padding-right: 0; }
+  .toolkit div { display: grid; grid-template-columns: 118px 1fr; align-items: baseline; border-right: 0; margin-right: 0; padding-right: 0; }
   .toolkit dd { margin: 0; font-size: 14.5px; }
   .index ol { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .index a { flex-direction: row; }
@@ -354,3 +379,7 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .big { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* lightbox: gallery images are buttons for keyboard users; a visible close control */
+.gallery img:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; }
+.lightbox .lb-close { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 24px; line-height: 40px; cursor: pointer; }
