@@ -78,7 +78,7 @@ img, video { display: block; max-width: 100%; height: auto; }
 @media (prefers-reduced-motion: reduce) { .art-sec { animation: none; } }
 
 /* ---------- Project index ---------- */
-.index { padding: 56px 0 8px; }
+.index { padding: 88px 0 8px; }
 .index-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px; }
 .index-head p { margin: 0; color: var(--muted); font-size: 15px; max-width: 46em; }
 .index ol { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -198,6 +198,9 @@ figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .demo h3 { margin: 0 0 8px; font-size: 24px; color: #fff; }
 .demo p { margin: 0 0 14px; color: #c5d6df; }
 .demo .btn { color: #fff; }
+/* the dashboard gets the full width under the video and its text, so the UI is readable */
+.demo > figure { grid-column: 1 / -1; margin: 8px 0 0; }
+.demo > figure img { width: 100%; height: auto; display: block; }
 
 .pending { display: grid; place-items: center; text-align: center; min-height: 280px; border-radius: var(--radius); border: 2px dashed var(--signal); color: var(--signal); background: #fff8f1; padding: 20px; }
 .todo { background: #fdeedd; color: #b5651d; padding: 0 4px; border-radius: 2px; }
@@ -330,6 +333,11 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
 @media (max-width: 960px) {
   .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-top: 52px; }
   .hero-art { max-width: 560px; margin: 0 auto; width: 100%; }
+  /* phone order: text, the two hero shots, then the contact buttons */
+  .hero .wrap { gap: 0; }
+  .hero .wrap > div:first-child { display: contents; }
+  .hero-art { order: 1; margin-top: 36px; }
+  .hero .cta { order: 2; margin-top: 36px; }
   .index ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lead-media, .brief, .decisions ol { grid-template-columns: minmax(0, 1fr); }
   .lead-media.pair, .lead-media.pair-even, .lead-media.pump { grid-template-columns: minmax(0, 1fr); }
@@ -362,7 +370,7 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .project-head { grid-template-columns: minmax(0, 1fr); }
   .project-head .num { grid-row: auto; font-size: 56px; }
   .demo { grid-template-columns: minmax(0, 1fr); }
-  .demo video { max-width: 320px; }
+  .demo video { max-width: 320px; margin: 0 auto; display: block; }
   footer .wrap { grid-template-columns: minmax(0, 1fr); }
   footer .cta { justify-content: flex-start; }
 }
@@ -380,6 +388,7 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   body { font-size: 15.5px; }
   .wrap { padding: 0 16px; }
   .project { padding: 60px 0; }
+  .index { padding-top: 64px; }
   .project-head .num { font-size: 56px; }
   .big { font-size: 32px; }
 }
