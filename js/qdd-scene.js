@@ -39,11 +39,11 @@ const LABELS = {
 // where each callout sits on each step: [dx, dy] from its part, in px (negative dx: label to the left; false: hidden)
 const PLACE = {
   wide: [{},
-    { output: [-219, -10], shaft: [-165, -30], discs: [-236, 20], housing: [-242, 20] },
-    { discs: [230, -40] },
+    { output: [-100, -10], shaft: [-125, -20], discs: [-105, 15], housing: [-105, 15] },
+    { discs: [130, -40] },
     { ratio: [-80, -150] }],
   phone: [{},
-    { output: [70, -10], shaft: [-75, -10], discs: [-112, 5], housing: [-115, 0] },
+    { output: [16, -12], shaft: [-68, -14], discs: [18, 20], housing: [-20, 28] },
     { discs: false },                  // no room beside the housing on a phone; the card says it
     { ratio: [112, 25] }],
 };
@@ -164,13 +164,14 @@ async function init() {
     const o = new THREE.Object3D(), u = units[ANCHOR_UNIT[name]];
     o.position.copy(V(name === 'ratio' ? rig.anchors.top : rig.anchors[name]));
     u.lift.add(o);
+    const rim = name === 'ratio' ? 0 : name === 'shaft' ? 0.008 : Math.hypot(o.position.x, o.position.z) * 0.95, ly = o.position.y;   // radius of the part's edge
     const el = document.createElement('div');
     el.className = 'ares3d-label' + (name === 'ratio' ? ' big' : '');
     el.innerHTML = `<b>${LABELS[name][0]}</b><span>${LABELS[name][1]}</span>`;
     const g = document.createElementNS(SVG, 'g');
     g.innerHTML = '<polyline/><circle class="halo" r="8"/><circle r="4"/>';
     labelLayer.appendChild(el); leaders.appendChild(g);
-    o.userData = { name, el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0 };
+    o.userData = { name, el, g, line: g.querySelector('polyline'), dots: g.querySelectorAll('circle'), a: 0, y: null, h: 0, rim, ly, lift: u.lift };
     anchors[name] = o;
   }
   const layout = { row: false, vo: null };
@@ -221,6 +222,7 @@ async function init() {
   new ResizeObserver(resize).observe(canvas); resize();
 
   const v = new THREE.Vector3(), lookV = new THREE.Vector3();
+  const camRight = new THREE.Vector3(), toCam = new THREE.Vector3(), rimDir = new THREE.Vector3(), axisV = new THREE.Vector3();
   const hudIn = hud?.querySelector('[data-in]'), hudOut = hud?.querySelector('[data-out]');
   let last = performance.now();
   function frame(now) {
@@ -263,8 +265,19 @@ async function init() {
     // callouts once the stack has settled
     const settled = Math.abs(cur.explode - k.explode) < 0.04 && Math.abs(cur.cam[2] - k.cam[2]) < 0.04;
     const w = canvas.clientWidth, h = canvas.clientHeight, shown = [];
+    const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
+    // each dot sits on its part's rim on the side facing its label (a little towards the camera),
+    // so the leader stops at the near edge instead of crossing the model
+    camRight.setFromMatrixColumn(camera.matrixWorld, 0).setY(0).normalize();
+    toCam.subVectors(camera.position, lookV).setY(0).normalize();
     for (const [name, o] of Object.entries(anchors)) {
       const d = o.userData;
+      if (d.rim) {
+        const side = (place[name] || [60])[0] < 0 ? -1 : 1;
+        rimDir.copy(camRight).multiplyScalar(side * 0.8).addScaledVector(toCam, 0.6).normalize();
+        d.lift.localToWorld(axisV.set(0, d.ly, 0)).addScaledVector(rimDir, d.rim);
+        o.position.copy(d.lift.worldToLocal(axisV));
+      }
       o.getWorldPosition(v).project(camera);
       d.ax = (v.x + 1) / 2 * w; d.ay = (1 - v.y) / 2 * h;
       const on = settled && k.labels.includes(name) && v.z < 1;
@@ -274,7 +287,6 @@ async function init() {
     }
     // Callouts: each has a set place per step (PLACE), an offset from its part, so it follows the part when that moves
     // (the lifted tool, the turning discs). Offsets are px at a 900 px (phone: 844 px) tall view and scale with it.
-    const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
     if (params.has('debug')) section.dataset.anchors = JSON.stringify(Object.fromEntries(shown.map(d => [d.name, [Math.round(d.ax), Math.round(d.ay)]])));
     for (const d of shown) {
       const a = place[d.name] === false ? 0 : d.a;
