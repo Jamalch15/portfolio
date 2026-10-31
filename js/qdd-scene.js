@@ -13,7 +13,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const section = document.querySelector('[data-qdd3d]');
-const canvas = section?.querySelector('canvas');
+let canvas = section?.querySelector('canvas');
 const labelLayer = section?.querySelector('.ares3d-labels');
 const dotsEl = section?.querySelector('.ares3d-dots');
 const hud = section?.querySelector('.qdd-hud');
@@ -61,11 +61,9 @@ const glide = (xs, vs, ts, goals, w, dt) => { goals.forEach((g, i) => { ts[i] = 
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
 const smooth = t => t * t * (3 - 2 * t);
-// test for WebGL 2, then release the test context at once: phones allow only a few live contexts
-function webglOK() {
-  try { const gl = document.createElement('canvas').getContext('webgl2'); gl?.getExtension('WEBGL_lose_context')?.loseContext(); return !!gl; }
-  catch { return false; }
-}
+// WebGL 2 at all? No test context: on phones every context counts against a small budget
+const webglOK = () => 'WebGL2RenderingContext' in window;
+let live = null;                                            // the renderer of the current attempt
 
 async function init() {
   if (!section || !canvas) return;
@@ -73,7 +71,7 @@ async function init() {
   if (labelLayer) labelLayer.textContent = '';             // a retry starts from a clean slate
   if (dotsEl) dotsEl.textContent = '';
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = live = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   const phone = innerWidth < 760;
   renderer.setPixelRatio(Math.min(devicePixelRatio, phone ? 1.5 : 2));    // lighter on phones
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -83,7 +81,8 @@ async function init() {
   renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
-  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; pmrem.dispose();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.005, 10);
   const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(0.5, 1.4, 0.7);
   key.castShadow = true; key.shadow.mapSize.set(phone ? 1024 : 2048, phone ? 1024 : 2048); key.shadow.bias = -0.0003; key.shadow.radius = 6;
@@ -299,6 +298,7 @@ async function init() {
     // Callouts: each has a set place per step (PLACE), an offset from its part, so it follows the part when that moves
     // (the lifted tool, the turning discs). Offsets are px at a 900 px (phone: 844 px) tall view and scale with it.
     if (params.has('debug')) section.dataset.anchors = JSON.stringify(Object.fromEntries(shown.map(d => [d.name, [Math.round(d.ax), Math.round(d.ay)]])));
+    const placed = [];
     for (const d of shown) {
       const a = place[d.name] === false ? 0 : d.a;
       d.el.style.opacity = a; d.g.style.opacity = a;
@@ -310,10 +310,18 @@ async function init() {
       let [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc); const flip = ox < 0;
       // phones: the callout docks against its screen edge (PLACE only picks the side and height), so it never runs off screen
       if (small) ox = flip ? 10 + LW - d.ax : w - 10 - LW - d.ax;
-      const x = d.ax + ox - (flip ? LW : 0), y = d.ay + oy - d.bh / 2;   // the leader meets the middle of the title
+      placed.push({ d, ox, flip, y: d.ay + oy - d.bh / 2 });          // the leader meets the middle of the title
+    }
+    // phones: docked callouts on one side share a column, so a lower one moves down clear of the one above
+    if (small) for (const side of [true, false]) {
+      const col = placed.filter(p => p.flip === side).sort((p, q) => p.y - q.y);
+      for (let i = 1; i < col.length; i++) col[i].y = Math.max(col[i].y, col[i - 1].y + col[i - 1].d.h + 10);
+    }
+    for (const { d, ox, flip, y } of placed) {
+      const x = d.ax + ox - (flip ? LW : 0), ly = y + d.bh / 2;
       d.el.classList.toggle('flip', flip);
       d.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${(d.ax + ox + (flip ? 6 : -6)).toFixed(1)},${(d.ay + oy).toFixed(1)}`);
+      d.line.setAttribute('points', `${d.ax.toFixed(1)},${d.ay.toFixed(1)} ${(d.ax + ox + (flip ? 6 : -6)).toFixed(1)},${ly.toFixed(1)}`);
       for (const c of d.dots) { c.setAttribute('cx', d.ax.toFixed(1)); c.setAttribute('cy', d.ay.toFixed(1)); }
     }
   }
@@ -326,7 +334,8 @@ async function init() {
 }
 
 // Load three.js work only when the section is about 1.5 screens away, so it doesn't compete with the page above.
-// Phones sometimes fail to start WebGL on the first try (a reload, memory pressure, a slow fetch), so try once more
+// Phones sometimes refuse a WebGL context for a moment (the other 3D scene still loading, memory pressure), so the
+// scenes on the page start one at a time, and a failed start is cleaned up and tried again with longer pauses
 // before falling back to the still and the cards. ?debug shows why it fell back.
 function fail(err) {
   console.error(err);
@@ -334,7 +343,18 @@ function fail(err) {
   section.classList.add('ares3d-static');
   if (params.has('debug')) { const p = document.createElement('p'); p.style.color = '#c0392b'; p.textContent = '3D failed: ' + (err?.message || err); section.prepend(p); }
 }
-const start = () => init().catch(err => { console.warn('3D start failed, retrying', err); setTimeout(() => init().catch(fail), 800); });
+function teardown() {                                       // release the failed context and start over on a fresh canvas
+  if (live) { try { live.dispose(); live.forceContextLoss(); } catch {} live = null; }
+  const fresh = canvas.cloneNode(); canvas.replaceWith(fresh); canvas = fresh;
+}
+const RETRY = [700, 1800, 4000];                            // ms before each further try
+const queue = fn => (window.__start3d = (window.__start3d || Promise.resolve()).then(fn, fn));
+const start = (n = 0) => queue(init).catch(err => {
+  teardown();
+  if (n >= RETRY.length) return fail(err);
+  console.warn('3D start failed, retrying', err);
+  setTimeout(() => start(n + 1), RETRY[n]);
+});
 if (section && 'IntersectionObserver' in window) {
   const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); start(); } }, { rootMargin: '150% 0px' });
   near.observe(section);
