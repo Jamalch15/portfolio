@@ -59,6 +59,8 @@ const TRAY_FLOOR = 0.003;
 const D2R = THREE.MathUtils.degToRad;
 const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda * dt));
 // critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
+// spring rates (1/s): lower is slower; a step change settles in about 5 / w seconds
+const SPRING_CAM = 1.2, SPRING_POSE = 1.4;
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -320,7 +322,7 @@ async function init() {
     const right = !!steps[active]?.classList.contains('right');
     const pad = Math.max(28, w / 2 - 600), card = Math.min(460, w - 2 * pad);
     const mid = ((right ? (w - pad - card) / 2 : (pad + card + w) / 2) + w / 2) / 2;   // halfway to the centre: room for callouts
-    layout.vo = layout.vo == null || snap ? w / 2 - mid : damp(layout.vo, w / 2 - mid, 2.4, dt);
+    layout.vo = layout.vo == null || snap ? w / 2 - mid : damp(layout.vo, w / 2 - mid, 1.4, dt);
     camera.setViewOffset(w, h, layout.vo, 0, w, h); camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(canvas); resize();
@@ -343,7 +345,7 @@ async function init() {
     // the pick cycle follows its own timeline closely; between steps the arm eases over with a spring
     if (frozen || params.has('pose')) cur.pose = [...target];
     else if (k.pick) { cur.pose = cur.pose.map((x, i) => damp(x, target[i], 10, dt)); cur.poseV.fill(0); }
-    else cur.pose = spring(cur.pose, cur.poseV, target, 2.3, dt);
+    else cur.pose = spring(cur.pose, cur.poseV, target, SPRING_POSE, dt);
     applyPose(cur.pose); setJaw(cur.pose[4]); setSwap(swap[0], swap[1]);
     world.updateMatrixWorld(true);
 
@@ -357,8 +359,8 @@ async function init() {
     // camera: a fixed view per step plus a slow ambient sway; callouts are tied to their parts, so they sway along
     const sway = frozen ? 0 : Math.sin(now / 7000) * 3;
     const lk = lookOf(k);
-    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, 2.0, dt);
-    cur.look = frozen ? [...lk] : spring(cur.look, cur.lookV, lk, 2.0, dt);
+    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, SPRING_CAM, dt);
+    cur.look = frozen ? [...lk] : spring(cur.look, cur.lookV, lk, SPRING_CAM, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
     const A = D2R(az + sway), E = D2R(el);

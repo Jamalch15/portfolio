@@ -48,12 +48,13 @@ const PLACE = {
     { ratio: [112, 25] }],
 };
 const CUT_AZ = 42;                        // the cutaway faces this azimuth (deg) and never moves
-const EXPLODE_S = 3;                      // seconds for the full explode or reassembly
 const ANCHOR_UNIT = { housing: 'housing', shaft: 'discHub', discs: 'discA', output: 'carrier', ratio: 'carrier' };
 
 const D2R = THREE.MathUtils.degToRad;
 const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda * dt));
 // critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
+// spring rates (1/s): lower is slower; a step change settles in about 5 / w seconds
+const SPRING_CAM = 1.2, SPRING_EXPLODE = 1.3;
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
 const smooth = t => t * t * (3 - 2 * t);
@@ -179,7 +180,7 @@ async function init() {
   // ---- state & input ----
   const fixedStep = params.has('qstep') ? Number(params.get('qstep')) : null;
   let active = fixedStep ?? 0;
-  const cur = { cam: [...KEYS[active].cam], look: [...KEYS[active].look], camV: [0, 0, 0], lookV: [0, 0, 0], explode: KEYS[active].explode, speed: KEYS[active].speed, cut: KEYS[active].cut,
+  const cur = { cam: [...KEYS[active].cam], look: [...KEYS[active].look], camV: [0, 0, 0], lookV: [0, 0, 0], explode: KEYS[active].explode, explodeV: [0], speed: KEYS[active].speed, cut: KEYS[active].cut,
                 fades: rig.order.map(name => KEYS[active].hide.includes(name) ? 0 : 1) };
   let theta = 0, theta0 = 0, orbit = 0;
   const dots = steps.map((s, i) => {
@@ -216,7 +217,7 @@ async function init() {
     const right = !!steps[active]?.classList.contains('right');
     const pad = Math.max(28, w / 2 - 600), card = Math.min(460, w - 2 * pad);
     const mid = ((right ? (w - pad - card) / 2 : (pad + card + w) / 2) + w / 2) / 2;   // halfway to the centre: room for callouts
-    layout.vo = layout.vo == null || snap ? w / 2 - mid : damp(layout.vo, w / 2 - mid, 2.4, dt);
+    layout.vo = layout.vo == null || snap ? w / 2 - mid : damp(layout.vo, w / 2 - mid, 1.4, dt);
     camera.setViewOffset(w, h, layout.vo, 0, w, h); camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(canvas); resize();
@@ -235,16 +236,16 @@ async function init() {
     cur.speed = damp(cur.speed, k.speed, 2, dt);
     theta = params.has('qtheta') ? D2R(Number(params.get('qtheta'))) : theta + cur.speed * 2 * Math.PI * dt;
     const ex = params.has('qexplode') ? Number(params.get('qexplode')) : k.explode;
-    cur.explode = frozen ? ex : cur.explode + THREE.MathUtils.clamp(ex - cur.explode, -dt / EXPLODE_S, dt / EXPLODE_S);
+    cur.explode = frozen ? ex : THREE.MathUtils.clamp(spring([cur.explode], cur.explodeV, [ex], SPRING_EXPLODE, dt)[0], 0, 1);   // eases in and out, no hard start or stop
     cur.fades = rig.order.map((name, i) => { const t = k.hide.includes(name) ? 0 : 1; return frozen ? t : damp(cur.fades[i], t, 4, dt); });
     setDrive(theta, cur.explode, cur.fades);
-    cur.cut = frozen ? k.cut : damp(cur.cut, k.cut, 2.4, dt);
+    cur.cut = frozen ? k.cut : damp(cur.cut, k.cut, 1.4, dt);
 
     // camera: orbit around a damped look point; steps with orbit > 0 revolve slowly
     // steps without orbit ease back to the nearest whole turn, so the camera ends where the step frames it
     orbit = frozen ? 0 : k.orbit ? orbit + k.orbit * dt : damp(orbit, Math.round(orbit / 360) * 360, 1.4, dt);
-    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, 2.0, dt);
-    cur.look = frozen ? [...k.look] : spring(cur.look, cur.lookV, k.look, 2.0, dt);
+    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, SPRING_CAM, dt);
+    cur.look = frozen ? [...k.look] : spring(cur.look, cur.lookV, k.look, SPRING_CAM, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
     const sway = frozen ? 0 : Math.sin(now / 8000) * 3;   // slow ambient sway; callouts move with their parts
@@ -263,7 +264,7 @@ async function init() {
     }
 
     // callouts once the stack has settled
-    const settled = Math.abs(cur.explode - k.explode) < 0.04 && Math.abs(cur.cam[2] - k.cam[2]) < 0.04;
+    const settled = Math.abs(cur.explode - k.explode) < 0.08 && Math.abs(cur.cam[2] - k.cam[2]) < 0.05;
     const w = canvas.clientWidth, h = canvas.clientHeight, shown = [];
     const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
     // each dot sits on its part's rim on the side facing its label (a little towards the camera),
