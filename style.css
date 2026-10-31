@@ -136,6 +136,9 @@ img, video { display: block; max-width: 100%; height: auto; }
 .iter-step { position: relative; padding: 22px 22px 20px; border-radius: var(--radius); background: #fff; border: 1px solid var(--rule); }
 .iter-step figure { margin: 6px 0 12px; }
 .iter-step img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #fff; border-radius: 8px; }
+/* V2: two photos of the unit on the wall, front and side */
+.iter-step figure.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.iter-step figure.pair img { aspect-ratio: 2 / 3; object-fit: cover; background: none; cursor: zoom-in; }
 .iter-k { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--signal-ink); }
 .iter-step h3 { margin: 6px 0 0; font-size: 20px; line-height: 1.25; color: var(--navy); }
 .iter-step p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--muted); }
