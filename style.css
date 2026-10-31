@@ -308,7 +308,7 @@ footer .cta { justify-content: flex-end; }
 .skip3d { display: inline-block; margin-top: 26px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--signal); text-decoration: none; border-bottom: 1px solid currentColor; }
 .dark .skip3d { color: var(--signal); }
 /* the same link stays on screen for the whole tour */
-.skip3d:has(+ .ares3d-ready) { display: none; }
+.skip3d:has(+ .ares3d-ready), .skip3d:has(+ .ares3d-static) { display: none; }
 .skip3d.tour { position: absolute; left: 24px; bottom: 18px; z-index: 3; margin: 0; padding: 7px 14px; border: 1px solid rgba(232,137,47,.55); border-radius: 999px;
   background: rgba(11,26,33,.72); }
 .skip3d.tour::after { content: " ↓"; }
@@ -328,7 +328,8 @@ footer .cta { justify-content: flex-end; }
 .qdd3d .ares3d-label span { color: var(--muted); }
 .qdd3d .ares3d-label.big b { color: var(--signal); }
 .qdd3d .ares3d-note { color: var(--muted); }
-.ares3d-label.compact span { display: none; }
+.ares3d-label.compact span { margin-top: 1px; font-size: 11px; line-height: 1.3; }   /* phones: smaller, but the description stays */
+.ares3d-hint { display: none; }
 .qdd-hud { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); display: flex; gap: 28px; padding: 10px 20px; border-radius: 999px;
   background: rgba(255,255,255,.86); border: 1px solid var(--rule); font-size: 13px; color: var(--muted); opacity: 0; transition: opacity .5s; pointer-events: none; white-space: nowrap; }
 .qdd-hud.on { opacity: 1; }
@@ -373,21 +374,25 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .gallery.center > figure { width: calc(50% - 7px); }
   .qdd-hud { bottom: auto; top: 58px; gap: 16px; padding: 8px 14px; }
   .skip3d.tour { left: auto; right: 12px; bottom: auto; top: 14px; padding: 6px 12px; font-size: 12px; }
-  .ares3d-step, .ares3d-step.right { align-items: flex-end; justify-content: center; padding: 0 12px 4vh; }
-  .step-card { width: 100%; padding: 22px 20px 18px; border-radius: 14px; }
+  .ares3d-step, .ares3d-step.right { align-items: flex-end; justify-content: center; padding: 0 10px 2.5vh; }
+  .step-card { width: 100%; padding: 16px 16px 13px; border-radius: 12px; }
+  .step-card .label { font-size: 11px; }
   .ares3d-ready .ares3d-step .step-card { transform: translateY(24px); }
   .ares3d-dots { display: none; }
   .step-card::before { left: 20px; }
-  .step-no { font-size: 50px; right: 14px; top: -28px; }
-  .step-card h3 { font-size: 23px; max-width: 13em; }
-  .step-card p { margin-top: 10px; font-size: 15px; line-height: 1.5; }
-  .step-meta { gap: 10px 20px; margin-top: 14px; padding-top: 12px; }
-  .step-meta dt { font-size: 18px; }
-  .step-meta dd { font-size: 12px; }
+  .step-no { font-size: 40px; right: 12px; top: -22px; }
+  .step-card h3 { margin-top: 6px; font-size: 20px; max-width: 15em; }
+  .step-card p { margin-top: 7px; font-size: 13.5px; line-height: 1.45; }
+  .step-meta { gap: 6px 18px; margin-top: 10px; padding-top: 9px; }
+  .step-meta dt { font-size: 15.5px; }
+  .step-meta dd { margin-top: 1px; font-size: 11px; }
   .ares3d-label b { font-size: 14px; line-height: 19px; }
   .ares3d-label span { font-size: 12px; line-height: 1.35; }
   .ares3d-label.big b { font-size: 28px; line-height: 32px; }
   .ares3d-note { display: none; }
+  .ares3d-hint { display: block; position: absolute; left: 12px; top: 14px; z-index: 3; padding: 6px 11px; border-radius: 999px; font-size: 11.5px; letter-spacing: .02em;
+    color: var(--mist); background: rgba(11,26,33,.6); border: 1px solid rgba(127,167,187,.3); }
+  .qdd3d .ares3d-hint { color: var(--muted); background: rgba(255,255,255,.85); border-color: var(--rule); }
   .also ul { grid-template-columns: minmax(0, 1fr); }
   .project-head { grid-template-columns: minmax(0, 1fr); }
   .project-head .num { grid-row: auto; font-size: 56px; }

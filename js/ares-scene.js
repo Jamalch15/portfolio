@@ -22,11 +22,11 @@ const DESIGN = [-30, 35, 55, 0];          // pose of assembly drawing ARES-Arm-0
 const TOOL_UP = [-30, 12, 30, -42];        // tool pointing straight up, for the quick-swap
 // Camera per step: azimuth, elevation (deg), distance (m), look-at point (m).
 const KEYS = [
-  { pose: DESIGN,            cam: [150, 14, 1.24], look: [-0.10, 0.23, 0.0], labels: [] },
+  { pose: DESIGN,            cam: [150, 14, 1.24], look: [-0.10, 0.23, 0.0], labels: [], phone: { cam: [150, 14, 1.6], look: [-0.14, 0.2, 0.0] } },
   { pose: [-30, 20, 40, 30], cam: [10, 12, 0.78], look: [-0.02, 0.11, 0.0], labels: ['base', 'shoulder', 'encoder'] },
-  { pose: DESIGN,            cam: [110, 12, 1.05], look: [-0.14, 0.28, 0.0], labels: ['elbow', 'wrist'] },
+  { pose: DESIGN,            cam: [110, 12, 1.05], look: [-0.14, 0.28, 0.0], labels: ['elbow', 'wrist'], phone: { cam: [110, 12, 1.2], look: [-0.24, 0.28, 0.0] } },
   { pose: TOOL_UP,           cam: [62, 14, 0.62], look: 'ring', labels: ['quickswap', 'pogo'], swap: true },
-  { pose: DESIGN,            cam: [170, 26, 1.38], look: [0.03, 0.17, 0.0], labels: ['result'], pick: true },
+  { pose: DESIGN,            cam: [170, 26, 1.38], look: [0.03, 0.17, 0.0], labels: ['result'], pick: true, phone: { cam: [160, 22, 2.0], look: [0.02, 0.42, 0.0] } },
 ];
 const LABELS = {
   base: ['Base yaw', 'PG5 geared stepper turns the whole arm'],
@@ -38,7 +38,8 @@ const LABELS = {
   pogo: ['Pogo connector', 'Mounted sideways, so the locking twist presses the contacts together'],
   result: ['48 / 50', 'bricks picked and sorted in the final test'],
 };
-// where each callout sits on each step: [dx, dy] from its part, in px (negative dx: label to the left)
+// where each callout sits on each step: [dx, dy] from its part, in px (negative dx: label to the left);
+// on phones only the side and dy count: the callout docks against that screen edge
 const PLACE = {
   wide: [{},
     { encoder: [110, -95], shoulder: [200, 25], base: [215, 10] },
@@ -47,9 +48,9 @@ const PLACE = {
     { result: [-40, 100] }],
   phone: [{},
     { encoder: [40, -60], shoulder: [-100, -40], base: [95, 15] },
-    { wrist: [20, -75], elbow: [40, -80] },
+    { wrist: [-1, -60], elbow: [1, -75] },
     { pogo: [-75, -40], quickswap: [-80, 20] },
-    { result: [40, 70] }],
+    { result: [1, 100] }],
 };
 const ANCHOR_LINK = { base: 'base', shoulder: 'j1', encoder: 'j1', elbow: 'j2', wrist: 'j3', quickswap: 'j4', pogo: 'j4' };
 const PICK_AT = [-0.10, 0.20], PLACE_AT = [0.13, -0.19];
@@ -68,7 +69,11 @@ const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * 
 const glide = (xs, vs, ts, goals, w, dt) => { goals.forEach((g, i) => { ts[i] = damp(ts[i], g, w, dt); }); return spring(xs, vs, ts, w, dt); };
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
-function webglOK() { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } }
+// test for WebGL 2, then release the test context at once: phones allow only a few live contexts
+function webglOK() {
+  try { const gl = document.createElement('canvas').getContext('webgl2'); gl?.getExtension('WEBGL_lose_context')?.loseContext(); return !!gl; }
+  catch { return false; }
+}
 
 // A timeline is a list of [duration s, values]; sample(t) eases between consecutive values.
 function timeline(keys) {
@@ -87,6 +92,8 @@ function timeline(keys) {
 async function init() {
   if (!section || !canvas) return;
   if (!webglOK() || reduced) { section.classList.add('ares3d-static'); return; }
+  if (labelLayer) labelLayer.textContent = '';             // a retry starts from a clean slate
+  if (dotsEl) dotsEl.textContent = '';
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   const phone = innerWidth < 760;
@@ -336,7 +343,9 @@ async function init() {
   function frame(now) {
     const dt = Math.min(0.12, (now - last) / 1000); last = now;
     pickStep();
-    let k = KEYS[active]; const t = params.has('t') ? Number(params.get('t')) : (now - stepStart) / 1000;
+    let k = KEYS[active];
+    if (layout.row && k.phone) k = { ...k, ...k.phone };   // phones: a framing of its own for this step
+    const t = params.has('t') ? Number(params.get('t')) : (now - stepStart) / 1000;
     const frozen = fixedStep !== null;
     if (params.has('key')) { const a = params.get('key').split(',').map(Number); k = { ...k, cam: a.slice(0, 3), look: a.slice(3, 6) }; }   // ?key=az,el,dist,lx,ly,lz
     // targets
@@ -395,7 +404,7 @@ async function init() {
     }
     // Callouts: each has a set place per step (PLACE), an offset from its part, so it follows the part when that moves
     // (the lifted tool, the turning discs). Offsets are px at a 900 px (phone: 844 px) tall view and scale with it.
-    const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
+    const small = layout.row, LW = small ? 124 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
     if (params.has('debug')) section.dataset.anchors = JSON.stringify(Object.fromEntries(shown.map(d => [d.name, [Math.round(d.ax), Math.round(d.ay)]])));
     for (const d of shown) {
       const a = place[d.name] === false ? 0 : d.a;
@@ -405,7 +414,9 @@ async function init() {
         d.el.classList.toggle('compact', small); d.el.style.width = LW + 'px';
         d.h = d.el.offsetHeight; d.bh = d.el.firstChild.offsetHeight; d.small = small;
       }
-      const [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc), flip = ox < 0;
+      let [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc); const flip = ox < 0;
+      // phones: the callout docks against its screen edge (PLACE only picks the side and height), so it never runs off screen
+      if (small) ox = flip ? 10 + LW - d.ax : w - 10 - LW - d.ax;
       const x = d.ax + ox - (flip ? LW : 0), y = d.ay + oy - d.bh / 2;   // the leader meets the middle of the title
       d.el.classList.toggle('flip', flip);
       d.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
@@ -422,7 +433,15 @@ async function init() {
 }
 
 // Load three.js work only when the section is about 1.5 screens away, so it doesn't compete with the page above.
-const start = () => init().catch(err => { console.error(err); section?.classList.add('ares3d-static'); });
+// Phones sometimes fail to start WebGL on the first try (a reload, memory pressure, a slow fetch), so try once more
+// before falling back to the still and the cards. ?debug shows why it fell back.
+function fail(err) {
+  console.error(err);
+  if (!section) return;
+  section.classList.add('ares3d-static');
+  if (params.has('debug')) { const p = document.createElement('p'); p.style.color = '#c0392b'; p.textContent = '3D failed: ' + (err?.message || err); section.prepend(p); }
+}
+const start = () => init().catch(err => { console.warn('3D start failed, retrying', err); setTimeout(() => init().catch(fail), 800); });
 if (section && 'IntersectionObserver' in window) {
   const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); start(); } }, { rootMargin: '150% 0px' });
   near.observe(section);

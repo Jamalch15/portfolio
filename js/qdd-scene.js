@@ -24,10 +24,10 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Per step: camera [azimuth, elevation deg, distance m], look-at, explode 0..1, input speed (turns/s),
 // orbit speed (deg/s), units faded out, quarter cutaway of the shell (0..1), callouts.
 const KEYS = [
-  { cam: [38, 30, 0.40], look: [0, 0.016, 0], explode: 0, speed: 0.45, orbit: 0, hide: [], cut: 1, labels: [] },
-  { cam: [38, 16, 0.74], look: [0, 0.122, 0], explode: 1, speed: 0.12, orbit: 0, hide: [], cut: 0, labels: ['housing', 'shaft', 'discs', 'output'] },
+  { cam: [38, 30, 0.40], look: [0, 0.016, 0], explode: 0, speed: 0.45, orbit: 0, hide: [], cut: 1, labels: [], phone: { cam: [38, 30, 0.34], look: [0, 0.012, 0] } },
+  { cam: [38, 16, 0.74], look: [0, 0.122, 0], explode: 1, speed: 0.12, orbit: 0, hide: [], cut: 0, labels: ['housing', 'shaft', 'discs', 'output'], phone: { cam: [38, 16, 0.68], look: [0, 0.12, 0] } },
   { cam: [24, 64, 0.38], look: [0, 0.006, 0], explode: 0, speed: 0.55, orbit: 0, hide: ['top', 'bearingTop', 'carrier', 'bearingOut', 'outputHub'], cut: 0, labels: ['discs'], hud: true },
-  { cam: [62, 22, 0.44], look: [0, 0.016, 0], explode: 0, speed: 0.3, orbit: 0, hide: [], cut: 1, labels: ['ratio'] },
+  { cam: [62, 22, 0.44], look: [0, 0.016, 0], explode: 0, speed: 0.3, orbit: 0, hide: [], cut: 1, labels: ['ratio'], phone: { cam: [62, 24, 0.55], look: [0, 0.07, 0] } },
 ];
 const LABELS = {
   housing: ['Printed housing', 'The discs roll directly on its lobed profile: no ring pins'],
@@ -45,7 +45,7 @@ const PLACE = {
   phone: [{},
     { output: [16, -12], shaft: [-68, -14], discs: [18, 20], housing: [-20, 28] },
     { discs: false },                  // no room beside the housing on a phone; the card says it
-    { ratio: [112, 25] }],
+    { ratio: [1, -75] }],
 };
 const CUT_AZ = 42;                        // the cutaway faces this azimuth (deg) and never moves
 const ANCHOR_UNIT = { housing: 'housing', shaft: 'discHub', discs: 'discA', output: 'carrier', ratio: 'carrier' };
@@ -61,11 +61,17 @@ const glide = (xs, vs, ts, goals, w, dt) => { goals.forEach((g, i) => { ts[i] = 
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
 const smooth = t => t * t * (3 - 2 * t);
-function webglOK() { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } }
+// test for WebGL 2, then release the test context at once: phones allow only a few live contexts
+function webglOK() {
+  try { const gl = document.createElement('canvas').getContext('webgl2'); gl?.getExtension('WEBGL_lose_context')?.loseContext(); return !!gl; }
+  catch { return false; }
+}
 
 async function init() {
   if (!section || !canvas) return;
   if (!webglOK() || reduced) { section.classList.add('ares3d-static'); return; }
+  if (labelLayer) labelLayer.textContent = '';             // a retry starts from a clean slate
+  if (dotsEl) dotsEl.textContent = '';
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   const phone = innerWidth < 760;
@@ -233,6 +239,7 @@ async function init() {
     const dt = Math.min(0.12, (now - last) / 1000); last = now;
     pickStep();
     let k = KEYS[active];
+    if (layout.row && k.phone) k = { ...k, ...k.phone };   // phones: a framing of its own for this step
     const frozen = fixedStep !== null;
     if (params.has('qcam')) { const a = params.get('qcam').split(',').map(Number); k = { ...k, cam: a.slice(0, 3), look: a.slice(3, 6) }; }
 
@@ -269,7 +276,7 @@ async function init() {
     // callouts once the stack has settled
     const settled = Math.abs(cur.explode - k.explode) < 0.08 && Math.abs(cur.cam[2] - k.cam[2]) < 0.05;
     const w = canvas.clientWidth, h = canvas.clientHeight, shown = [];
-    const small = layout.row, LW = small ? 120 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
+    const small = layout.row, LW = small ? 124 : 210, sc = h / (small ? 844 : 900), place = PLACE[small ? 'phone' : 'wide'][active] ?? {};
     // each dot sits on its part's rim on the side facing its label (a little towards the camera),
     // so the leader stops at the near edge instead of crossing the model
     camRight.setFromMatrixColumn(camera.matrixWorld, 0).setY(0).normalize();
@@ -300,7 +307,9 @@ async function init() {
         d.el.classList.toggle('compact', small); d.el.style.width = LW + 'px';
         d.h = d.el.offsetHeight; d.bh = d.el.firstChild.offsetHeight; d.small = small;
       }
-      const [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc), flip = ox < 0;
+      let [ox, oy] = (place[d.name] || [60, -40]).map(t => t * sc); const flip = ox < 0;
+      // phones: the callout docks against its screen edge (PLACE only picks the side and height), so it never runs off screen
+      if (small) ox = flip ? 10 + LW - d.ax : w - 10 - LW - d.ax;
       const x = d.ax + ox - (flip ? LW : 0), y = d.ay + oy - d.bh / 2;   // the leader meets the middle of the title
       d.el.classList.toggle('flip', flip);
       d.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
@@ -317,7 +326,15 @@ async function init() {
 }
 
 // Load three.js work only when the section is about 1.5 screens away, so it doesn't compete with the page above.
-const start = () => init().catch(err => { console.error(err); section?.classList.add('ares3d-static'); });
+// Phones sometimes fail to start WebGL on the first try (a reload, memory pressure, a slow fetch), so try once more
+// before falling back to the still and the cards. ?debug shows why it fell back.
+function fail(err) {
+  console.error(err);
+  if (!section) return;
+  section.classList.add('ares3d-static');
+  if (params.has('debug')) { const p = document.createElement('p'); p.style.color = '#c0392b'; p.textContent = '3D failed: ' + (err?.message || err); section.prepend(p); }
+}
+const start = () => init().catch(err => { console.warn('3D start failed, retrying', err); setTimeout(() => init().catch(fail), 800); });
 if (section && 'IntersectionObserver' in window) {
   const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); start(); } }, { rootMargin: '150% 0px' });
   near.observe(section);
