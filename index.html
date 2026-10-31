@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#193747">
-<link rel="stylesheet" href="style.css?v=85bb90c5">
+<link rel="stylesheet" href="style.css?v=52fa8e42">
 <script>document.documentElement.classList.add('js')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 <script type="module" src="js/ares-scene.js?v=c7f63fe3"></script><script type="module" src="js/qdd-scene.js?v=663f528f"></script>
@@ -72,7 +72,9 @@
         </div>
       </div>
       <p class="lede"><b>A modular robot arm, built for many tasks.</b> Its tools change by hand with a twist, and a browser dashboard lets you set up and run new jobs. We put it to the test on fully automatic LEGO sorting: <b>48 of 50 bricks</b> sorted.</p>
-      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks · Maple</dd></div><div><dt>Electronics</dt><dd>KiCad · ESP32-S3</dd></div><div><dt>Software</dt><dd>Python · FastAPI · camera vision</dd></div></dl>
+      <div class="skills"><span class="skills-label">Skills and tools in this project</span>
+        <div class="skills-grid"><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7M8.5 11h1.5M12 11h1.5M8.5 14.5h1.5M12 14.5h1.5M8.5 18h1.5M12 18h1.5M15.5 11v7"/></svg>Engineering</h4><ul><li class="key">Worst-case torque sizing</li><li>DH forward kinematics</li><li>Jacobian inverse kinematics</li><li>Trajectory planning</li><li>Moment calculations in Maple</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Mechanical design</h4><ul><li class="key">SolidWorks assemblies</li><li>Modular joints on 2020 extrusion</li><li>Tool-free quick-swap interface</li><li>Gear-driven parallel gripper</li><li>Motor and gearbox selection</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 7V3M14 7V3M10 21v-4M14 21v-4M7 10H3M7 14H3M21 10h-4M21 14h-4"/></svg>Electronics &amp; control</h4><ul><li class="key">ESP32-S3 firmware</li><li>KiCad schematics</li><li>TB6600 stepper drivers</li><li>3.3 V to 5 V level shifting</li><li>AS5048A encoder correction</li><li>Camera colour detection</li><li>FastAPI browser dashboard</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M5 13h14M7 9h10M9 5h6"/></svg>Build &amp; test</h4><ul><li class="key">48 / 50 repeatability test</li><li>Torque test</li><li>FDM printing</li><li>Perfboard electronics modules</li><li>24 V supply with e-stops</li><li>pytest with CI</li></ul></div></div>
+      </div>
 
       <div class="lead-media pair">
         <figure>
@@ -163,7 +165,9 @@
         </div>
       </div>
       <p class="lede"><b>A printable robot joint, designed from scratch to be backdrivable.</b> A low-ratio cycloidal drive for a drone motor, the quasi-direct-drive (QDD) kind of actuator used in legged robots, made to be printed at home from few bought parts.</p>
-      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks · cycloid geometry</dd></div><div><dt>Drive</dt><dd>BLDC motor · FOC (planned) · bearing selection</dd></div><div><dt>Build</dt><dd>FDM printing</dd></div></dl>
+      <div class="skills"><span class="skills-label">Skills and tools in this project</span>
+        <div class="skills-grid"><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7M8.5 11h1.5M12 11h1.5M8.5 14.5h1.5M12 14.5h1.5M8.5 18h1.5M12 18h1.5M15.5 11v7"/></svg>Engineering</h4><ul><li class="key">Cycloidal reduction, 15 : 1</li><li>Torque and speed targets</li><li>Load and efficiency estimates</li><li>Bearing selection</li><li>Backdrivability as a design goal</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Mechanical design</h4><ul><li class="key">SolidWorks parametric CAD</li><li>Cycloid disc profile geometry</li><li>Twin discs, 180° apart</li><li>Three-piece eccentric shaft</li><li>Pin-and-sleeve output</li><li>Printed housing as the ring</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 7V3M14 7V3M10 21v-4M14 21v-4M7 10H3M7 14H3M21 10h-4M21 14h-4"/></svg>Electronics &amp; control</h4><ul><li class="key">T-Motor MN6007 II BLDC</li><li>FOC driver selection</li><li>Datasheet-based motor sizing</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M5 13h14M7 9h10M9 5h6"/></svg>Build &amp; test</h4><ul><li class="key">Design for FDM</li><li>Printed discs with real bearings</li><li>Iterated: sleeves to direct contact</li><li>Printer calibration</li></ul></div></div>
+      </div>
 
       <div class="lead-media pair-even">
         <figure><img src="assets/qdd-v1-printed-parts.jpg" width="1536" height="1152" alt="First printed prototype: cycloidal disc with bearings, housing, outrunner BLDC motor and FOC control board" loading="lazy"><figcaption>The first printed prototype: disc, housing, bearings, the outrunner motor and the FOC board, laid out for integration.</figcaption></figure>
@@ -222,7 +226,9 @@
         </div>
       </div>
       <p class="lede"><b>A year in service, then a redesign.</b> I designed the hardware for a wall-mounted check-in terminal. V1 served the association for a year; from what that year showed, they asked for an improved unit, and I redesigned it. <b>V2 is in service every week.</b></p>
-      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks</dd></div><div><dt>Hardware</dt><dd>Raspberry Pi 3B+ · GM60 scanner · display</dd></div><div><dt>Build</dt><dd>FDM printing · assembly and testing</dd></div></dl>
+      <div class="skills"><span class="skills-label">Skills and tools in this project</span>
+        <div class="skills-grid"><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7M8.5 11h1.5M12 11h1.5M8.5 14.5h1.5M12 14.5h1.5M8.5 18h1.5M12 18h1.5M15.5 11v7"/></svg>Engineering</h4><ul><li class="key">Field-driven requirements</li><li>User-centred design for older users</li><li>Design iteration, V1 to V2</li><li>DFM and DFA</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Mechanical design</h4><ul><li class="key">SolidWorks enclosure design</li><li>Packaging around real parts</li><li>Protruding scanner module</li><li>Wall-mount design</li><li>Through-wall cable routing</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 7V3M14 7V3M10 21v-4M14 21v-4M7 10H3M7 14H3M21 10h-4M21 14h-4"/></svg>Electronics &amp; control</h4><ul><li class="key">Raspberry Pi 3B+ integration</li><li>GM60 QR scanner</li><li>Touch Display 2, 5-inch</li><li>Hardware integration</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M5 13h14M7 9h10M9 5h6"/></svg>Build &amp; test</h4><ul><li class="key">In service every week</li><li>Single-material FDM in PLA</li><li>Assembly and testing</li><li>Serviceable enclosure</li></ul></div></div>
+      </div>
 
       <div class="evo">
         <ol class="evo-rail" aria-label="Design process">
@@ -270,7 +276,9 @@
         </div>
       </div>
       <p class="lede"><b>A printed syringe pump within 99–101 % of set flow.</b> A modular pump that pushes and pulls, takes 6–24 mL syringes and turns stepper rotation into precise plunger travel. I modelled it, built it and measured it.</p>
-      <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks</dd></div><div><dt>Build</dt><dd>FDM printing · laser cutting</dd></div><div><dt>Control and test</dt><dd>Arduino · calibration · flow measurement</dd></div></dl>
+      <div class="skills"><span class="skills-label">Skills and tools in this project</span>
+        <div class="skills-grid"><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7M8.5 11h1.5M12 11h1.5M8.5 14.5h1.5M12 14.5h1.5M8.5 18h1.5M12 18h1.5M15.5 11v7"/></svg>Engineering</h4><ul><li class="key">Flow calibration, R² ≈ 1</li><li>Lead-screw motion conversion</li><li>Microstepping tests, 1/16 and 1/32</li><li>Test plan, 3 repeats per point</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Mechanical design</h4><ul><li class="key">SolidWorks modelling</li><li>Syringe clamp for 6 to 24 mL</li><li>Push plate stiffened against play</li><li>Modular base on a 25 mm grid</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 7V3M14 7V3M10 21v-4M14 21v-4M7 10H3M7 14H3M21 10h-4M21 14h-4"/></svg>Electronics &amp; control</h4><ul><li class="key">Arduino control</li><li>NEMA 17 stepper</li><li>TB6600 driver</li></ul></div><div class="sk"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18M5 13h14M7 9h10M9 5h6"/></svg>Build &amp; test</h4><ul><li class="key">99–101 % of set flow</li><li>Weighed on a 0.01 g scale</li><li>FDM parts, under 30 min each</li><li>Laser-cut acrylic base</li><li>Technical report writing</li></ul></div></div>
+      </div>
 
       <div class="lead-media pump">
         <figure><img src="assets/pump-prototype.jpg" width="1200" height="900" alt="Syringe pump prototype: stepper motor, lead screw, push plate and syringe on an acrylic base" loading="lazy"></figure>
