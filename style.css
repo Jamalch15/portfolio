@@ -222,16 +222,15 @@ figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .todo { background: #fdeedd; color: #b5651d; padding: 0 4px; border-radius: 2px; }
 
 /* ---------- More projects (05-07) ---------- */
-.also { padding: 72px 0 84px; background: var(--panel); border-top: 1px solid var(--rule); }
-.also-title { margin: 10px 0 0; font-size: clamp(26px, 3.2vw, 36px); color: var(--navy); font-weight: 720; line-height: 1.15; }
-.also-intro { margin: 10px 0 0; color: var(--muted); max-width: 44em; }
-.also ul { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.also li { background: #fff; border: 1px solid var(--rule); border-radius: var(--radius); padding: 24px 24px 26px; display: grid; gap: 10px; align-content: start; border-top: 3px solid var(--signal); }
-.also .num { font-size: 52px; font-weight: 800; line-height: .9; color: transparent; -webkit-text-stroke: 1.5px var(--steel); }
-.also b { color: var(--navy); font-size: 21px; font-weight: 700; line-height: 1.25; }
-.also p { margin: 0; }
-.also p.small { font-size: 14.5px; color: var(--muted); }
-.also .meta { gap: 6px; }
+.also { padding: 60px 0 68px; background: var(--panel); border-top: 1px solid var(--rule); }
+.also-title { margin: 8px 0 0; font-size: clamp(24px, 2.6vw, 30px); color: var(--navy); font-weight: 720; line-height: 1.15; }
+.also-intro { margin: 8px 0 0; color: var(--muted); max-width: 44em; }
+.also ul { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.also li { background: #fff; border: 1px solid var(--rule); border-top: 3px solid var(--signal); border-radius: var(--radius); padding: 18px 20px 18px; display: flex; flex-direction: column; gap: 8px; }
+.also b { color: var(--navy); font-size: 18px; font-weight: 700; line-height: 1.25; }
+.also p { margin: 0; flex: 1; font-size: 15px; line-height: 1.55; color: var(--muted); }
+.also-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.also-skills span { padding: 3px 10px; border-radius: 999px; font-size: 12.5px; color: var(--navy); background: var(--panel); border: 1px solid var(--rule); }
 
 /* ---------- Footer ---------- */
 footer { background: var(--navy); color: var(--mist); }

@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#193747">
-<link rel="stylesheet" href="style.css?v=91846313">
+<link rel="stylesheet" href="style.css?v=a65900cd">
 <script>document.documentElement.classList.add('js')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 <script type="module" src="js/ares-scene.js?v=0d2995a1"></script><script type="module" src="js/qdd-scene.js?v=5cf3efff"></script>
@@ -313,29 +313,11 @@
     <div class="wrap">
       <span class="label" style="color:var(--signal)">Honorable mentions</span>
       <h2 class="also-title">More I've built</h2>
-      <p class="also-intro">Projects that ran for months alongside my studies, each with its own engineering story.</p>
+      <p class="also-intro">A few more projects from alongside my studies.</p>
       <ul>
-        <li>
-          <b>Vision-guided nerf turret</b>
-          <div class="meta"><span class="chip status done">Working prototype</span><span class="chip">2024–2026</span></div>
-          <div class="meta"><span class="chip">YOLOv8n</span><span class="chip">OpenCV</span><span class="chip">Arduino</span><span class="chip">Steppers</span><span class="chip">Bluetooth</span></div>
-          <p>A pan/tilt turret that finds a target and fires on its own. A camera on the blaster feeds YOLOv8n in Python on a PC; the target's offset in the image, with a deadband, becomes yaw and pitch commands sent over HC-05 Bluetooth to an Arduino driving two steppers.</p>
-          <p class="small">Mechanics designed in CAD and printed, with bearings in the joints. My first soldered perfboard. Detection runs at about 20 FPS on a CPU.</p>
-        </li>
-        <li>
-          <b>Bike-powered phone charger</b>
-          <div class="meta"><span class="chip status design">Electrical prototype · team of 2</span><span class="chip">2024–2025</span></div>
-          <div class="meta"><span class="chip">Power electronics</span><span class="chip">Supercapacitor</span><span class="chip">USB-PD</span><span class="chip">Chain drive</span></div>
-          <p>A charger designed to keep a phone charging through stops. A bike-driven generator feeds a buck converter, a supercapacitor buffer (2.7 V, 500 F) and a boost stage to a USB Power Delivery output.</p>
-          <p class="small">Built with a fellow mechanical engineering student. The drive concept moved from a friction-wheel dynamo towards a chain take-off for robustness. The electrical side was prototyped; the bike integration is still ahead.</p>
-        </li>
-        <li>
-          <b>Table football goalkeeper bot</b>
-          <div class="meta"><span class="chip status design">Mechanism CAD + partial build</span><span class="chip">2025–2026</span></div>
-          <div class="meta"><span class="chip">2-DOF mechanism</span><span class="chip">Belt drive</span><span class="chip">Encoders</span><span class="chip">Structural simulation</span></div>
-          <p>A robot that plays goalkeeper on a table football table: two degrees of freedom, a belt drive that slides the keeper rod and a second axis that rotates it.</p>
-          <p class="small">Designed in CAD with structural simulation. I compared steppers, DC motors with encoders and servos for the axes, and evaluated a 500 pulse-per-revolution encoder. Camera-based ball tracking is planned as the next stage.</p>
-        </li>
+        <li><b>Vision-guided nerf turret</b><p>A pan/tilt turret that spots a target with YOLOv8 computer vision, then aims and fires on its own.</p><span class="also-skills"><span>Computer vision</span><span>Embedded control</span><span>Printed mechanics</span></span></li>
+        <li><b>Bike-powered phone charger</b><p>A bike-driven generator designed to charge a phone, with a supercapacitor buffer that keeps the charge going through stops. Built with a fellow student.</p><span class="also-skills"><span>Power electronics</span><span>Energy storage</span><span>Drivetrain design</span></span></li>
+        <li><b>Table football goalkeeper bot</b><p>A two-axis goalkeeper for table football: a belt drive slides the keeper rod and a second axis spins it to block shots.</p><span class="also-skills"><span>Mechanism design</span><span>Actuator selection</span><span>Structural simulation</span></span></li>
       </ul>
     </div>
   </section>
