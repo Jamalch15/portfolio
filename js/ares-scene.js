@@ -59,10 +59,13 @@ const TRAY_FLOOR = 0.003;
 const D2R = THREE.MathUtils.degToRad;
 const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda * dt));
 // critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
-// spring rates (1/s): lower is slower; a step change settles in about 5 / w seconds
-const SPRING_CAM = 1.2, SPRING_POSE = 1.4;
+// transition rates (1/s) for glide(): lower is slower; a step change is 90 % done in about 5.3 / w seconds
+const SPRING_CAM = 1.6, SPRING_POSE = 1.8;
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
+// two stages: the target itself eases towards the step's value and a spring follows it, so a move
+// builds up from rest (no kick on the first frame) and still settles softly; ts holds the eased target
+const glide = (xs, vs, ts, goals, w, dt) => { goals.forEach((g, i) => { ts[i] = damp(ts[i], g, w, dt); }); return spring(xs, vs, ts, w, dt); };
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 function webglOK() { try { return !!document.createElement('canvas').getContext('webgl2'); } catch { return false; } }
@@ -288,6 +291,7 @@ async function init() {
   world.updateMatrixWorld(true);
   const cur = { pose: [...KEYS[active].pose, 0], cam: [...KEYS[active].cam], look: [...lookOf(KEYS[active])],
                 poseV: [0, 0, 0, 0, 0], camV: [0, 0, 0], lookV: [0, 0, 0] };
+  cur.poseT = [...cur.pose]; cur.camT = [...cur.cam]; cur.lookT = [...cur.look];
   const dots = steps.map((s, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Step ${i + 1}: ${s.querySelector('h3')?.textContent ?? ''}`);
     b.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -344,8 +348,8 @@ async function init() {
     if (params.has('swap')) { const s = Number(params.get('swap')); swap = [rig.tool.twist_deg * Math.min(1, s * 2), 0.055 * Math.max(0, s * 2 - 1)]; }
     // the pick cycle follows its own timeline closely; between steps the arm eases over with a spring
     if (frozen || params.has('pose')) cur.pose = [...target];
-    else if (k.pick) { cur.pose = cur.pose.map((x, i) => damp(x, target[i], 10, dt)); cur.poseV.fill(0); }
-    else cur.pose = spring(cur.pose, cur.poseV, target, SPRING_POSE, dt);
+    else if (k.pick) { cur.pose = cur.pose.map((x, i) => damp(x, target[i], 10, dt)); cur.poseV.fill(0); cur.poseT.splice(0, cur.pose.length, ...cur.pose); }
+    else cur.pose = glide(cur.pose, cur.poseV, cur.poseT, target, SPRING_POSE, dt);
     applyPose(cur.pose); setJaw(cur.pose[4]); setSwap(swap[0], swap[1]);
     world.updateMatrixWorld(true);
 
@@ -359,8 +363,8 @@ async function init() {
     // camera: a fixed view per step plus a slow ambient sway; callouts are tied to their parts, so they sway along
     const sway = frozen ? 0 : Math.sin(now / 7000) * 3;
     const lk = lookOf(k);
-    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, SPRING_CAM, dt);
-    cur.look = frozen ? [...lk] : spring(cur.look, cur.lookV, lk, SPRING_CAM, dt);
+    cur.cam = frozen ? [...k.cam] : glide(cur.cam, cur.camV, cur.camT, k.cam, SPRING_CAM, dt);
+    cur.look = frozen ? [...lk] : glide(cur.look, cur.lookV, cur.lookT, lk, SPRING_CAM, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
     const A = D2R(az + sway), E = D2R(el);

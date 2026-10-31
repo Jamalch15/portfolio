@@ -53,8 +53,11 @@ const ANCHOR_UNIT = { housing: 'housing', shaft: 'discHub', discs: 'discA', outp
 const D2R = THREE.MathUtils.degToRad;
 const damp = (x, target, lambda, dt) => x + (target - x) * (1 - Math.exp(-lambda * dt));
 // critically damped spring: eases in and out between steps (no snap at the start, no overshoot); v holds velocities
-// spring rates (1/s): lower is slower; a step change settles in about 5 / w seconds
-const SPRING_CAM = 1.2, SPRING_EXPLODE = 1.3;
+// transition rates (1/s) for glide(): lower is slower; a step change is 90 % done in about 5.3 / w seconds
+const SPRING_CAM = 1.6, SPRING_EXPLODE = 1.7;
+// two stages: the target itself eases towards the step's value and a spring follows it, so a move
+// builds up from rest (no kick on the first frame) and still settles softly; ts holds the eased target
+const glide = (xs, vs, ts, goals, w, dt) => { goals.forEach((g, i) => { ts[i] = damp(ts[i], g, w, dt); }); return spring(xs, vs, ts, w, dt); };
 const spring = (xs, vs, targets, w, dt) => xs.map((x, i) => { vs[i] += (w * w * (targets[i] - x) - 2 * w * vs[i]) * dt; return x + vs[i] * dt; });
 
 const smooth = t => t * t * (3 - 2 * t);
@@ -180,7 +183,7 @@ async function init() {
   // ---- state & input ----
   const fixedStep = params.has('qstep') ? Number(params.get('qstep')) : null;
   let active = fixedStep ?? 0;
-  const cur = { cam: [...KEYS[active].cam], look: [...KEYS[active].look], camV: [0, 0, 0], lookV: [0, 0, 0], explode: KEYS[active].explode, explodeV: [0], speed: KEYS[active].speed, cut: KEYS[active].cut,
+  const cur = { cam: [...KEYS[active].cam], look: [...KEYS[active].look], camV: [0, 0, 0], lookV: [0, 0, 0], explode: KEYS[active].explode, explodeV: [0], explodeT: [KEYS[active].explode], camT: [...KEYS[active].cam], lookT: [...KEYS[active].look], speed: KEYS[active].speed, cut: KEYS[active].cut,
                 fades: rig.order.map(name => KEYS[active].hide.includes(name) ? 0 : 1) };
   let theta = 0, theta0 = 0, orbit = 0;
   const dots = steps.map((s, i) => {
@@ -236,7 +239,7 @@ async function init() {
     cur.speed = damp(cur.speed, k.speed, 2, dt);
     theta = params.has('qtheta') ? D2R(Number(params.get('qtheta'))) : theta + cur.speed * 2 * Math.PI * dt;
     const ex = params.has('qexplode') ? Number(params.get('qexplode')) : k.explode;
-    cur.explode = frozen ? ex : THREE.MathUtils.clamp(spring([cur.explode], cur.explodeV, [ex], SPRING_EXPLODE, dt)[0], 0, 1);   // eases in and out, no hard start or stop
+    cur.explode = frozen ? ex : THREE.MathUtils.clamp(glide([cur.explode], cur.explodeV, cur.explodeT, [ex], SPRING_EXPLODE, dt)[0], 0, 1);   // eases in and out, no hard start or stop
     cur.fades = rig.order.map((name, i) => { const t = k.hide.includes(name) ? 0 : 1; return frozen ? t : damp(cur.fades[i], t, 4, dt); });
     setDrive(theta, cur.explode, cur.fades);
     cur.cut = frozen ? k.cut : damp(cur.cut, k.cut, 1.4, dt);
@@ -244,8 +247,8 @@ async function init() {
     // camera: orbit around a damped look point; steps with orbit > 0 revolve slowly
     // steps without orbit ease back to the nearest whole turn, so the camera ends where the step frames it
     orbit = frozen ? 0 : k.orbit ? orbit + k.orbit * dt : damp(orbit, Math.round(orbit / 360) * 360, 1.4, dt);
-    cur.cam = frozen ? [...k.cam] : spring(cur.cam, cur.camV, k.cam, SPRING_CAM, dt);
-    cur.look = frozen ? [...k.look] : spring(cur.look, cur.lookV, k.look, SPRING_CAM, dt);
+    cur.cam = frozen ? [...k.cam] : glide(cur.cam, cur.camV, cur.camT, k.cam, SPRING_CAM, dt);
+    cur.look = frozen ? [...k.look] : glide(cur.look, cur.lookV, cur.lookT, k.look, SPRING_CAM, dt);
     const [az, el, dist] = cur.cam, portrait = camera.aspect < 1 ? 1.8 : 1;
     lookV.set(...cur.look);
     const sway = frozen ? 0 : Math.sin(now / 8000) * 3;   // slow ambient sway; callouts move with their parts
