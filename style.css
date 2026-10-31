@@ -135,9 +135,9 @@ img, video { display: block; max-width: 100%; height: auto; }
 /* QR scanner: prototype -> field evaluation -> redesign */
 .evo { margin-top: 34px; }
 .evo-rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 24px; position: relative; }
-.evo-rail::before { content: ""; position: absolute; left: 7px; right: 33%; top: 7px; height: 2px; background: linear-gradient(90deg, var(--rule), var(--signal)); }
-.evo-rail li { position: relative; padding-top: 28px; }
-.evo-rail li::before { content: ""; position: absolute; left: 0; top: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--panel); border: 2px solid var(--steel); box-sizing: border-box; }
+.evo-rail::before { content: ""; position: absolute; left: calc((100% - 48px) / 6); right: calc((100% - 48px) / 6); top: 7px; height: 2px; background: linear-gradient(90deg, var(--rule), var(--signal)); }
+.evo-rail li { position: relative; padding-top: 28px; text-align: center; }
+.evo-rail li::before { content: ""; position: absolute; left: calc(50% - 8px); top: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--panel); border: 2px solid var(--steel); box-sizing: border-box; }
 .evo-rail li.now::before { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 0 5px rgba(232,137,47,.18); }
 .evo-n { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--signal-ink); }
 .evo-rail b { display: block; margin-top: 2px; font-size: 19px; color: var(--navy); }
@@ -358,7 +358,8 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .lead-media.pump .stack img { height: auto; }
   .evo-rail { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .evo-rail::before { left: 7px; right: auto; top: 8px; bottom: 8px; width: 2px; height: auto; background: linear-gradient(180deg, var(--rule), var(--signal)); }
-  .evo-rail li { padding: 0 0 0 30px; }
+  .evo-rail li { padding: 0 0 0 30px; text-align: left; }
+  .evo-rail li::before { left: 0; }
   .evo-media { grid-template-columns: minmax(0, 1fr); }
   .evo-v1 img { flex: none; aspect-ratio: 4 / 3; }
   .evo-head { display: none; }
