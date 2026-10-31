@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#193747">
-<link rel="stylesheet" href="style.css?v=03a72fc3">
+<link rel="stylesheet" href="style.css?v=8f77861f">
 <script>document.documentElement.classList.add('js')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 <script type="module" src="js/ares-scene.js?v=c7f63fe3"></script><script type="module" src="js/qdd-scene.js?v=663f528f"></script>
@@ -221,43 +221,37 @@
           <span class="ctx">Independent, for an association</span>
         </div>
       </div>
-      <p class="lede"><b>Built, used, learned from, rebuilt.</b> I designed the hardware for a wall-mounted check-in terminal, put it on the wall, watched how people really used it, and redesigned it. <b>V2 is far cleaner and in use every week.</b></p>
+      <p class="lede"><b>Prototype, field evaluation, redesign.</b> I designed the hardware for a wall-mounted check-in terminal, installed it, evaluated it in real use and redesigned it from what we found. <b>V2 is in service every week.</b></p>
       <dl class="toolkit"><div><dt>Design</dt><dd>SolidWorks</dd></div><div><dt>Hardware</dt><dd>Raspberry Pi 3B+ · GM60 scanner · display</dd></div><div><dt>Build</dt><dd>FDM printing · assembly and testing</dd></div></dl>
 
-      <div class="iter">
-        <div class="iter-step">
-          <span class="iter-k">V1</span>
-          <figure><img src="assets/qr-v1-cad.jpg" width="760" height="570" alt="V1 enclosure in SolidWorks: front with display opening and scan window, and the back shell with the Raspberry Pi" loading="lazy"></figure>
-          <h3>Built and put on the wall</h3>
-          <p>An enclosure designed around the display, the GM60 scanner and the Raspberry Pi, printed, assembled and mounted.</p>
+      <div class="evo">
+        <ol class="evo-rail" aria-label="Design process">
+          <li><span class="evo-n">01</span><b>Prototype</b><span>V1 designed, printed and installed</span></li>
+          <li><span class="evo-n">02</span><b>Field evaluation</b><span>Issues and real-world use logged on the wall</span></li>
+          <li class="now"><span class="evo-n">03</span><b>Redesign</b><span>V2, in service every week</span></li>
+        </ol>
+        <div class="evo-media">
+          <figure class="evo-v1"><span class="evo-tag">V1 · Prototype</span><img src="assets/qr-v1-cad.jpg" width="760" height="570" alt="V1 enclosure in SolidWorks: front with display opening and scan window, and the back shell with the Raspberry Pi" loading="lazy"><figcaption>The first enclosure in SolidWorks: display, scan window and the Raspberry Pi in a back shell.</figcaption></figure>
+          <figure class="evo-v2"><span class="evo-tag">V2 · In service</span><div class="evo-pair"><img class="zoom" src="assets/qr-v2-front.jpg" width="800" height="1200" alt="V2 terminal on the wall, from the front: the 5-inch display above a separate scanner head with a green ring" loading="lazy"><img class="zoom" src="assets/qr-v2-angle.jpg" width="800" height="1200" alt="V2 terminal from the side: the printed housing, wall mount and the scanner head projecting forward" loading="lazy"></div><figcaption>On the wall: the scanner head projects from below the display as its own module.</figcaption></figure>
         </div>
-        <div class="iter-arrow" aria-hidden="true"></div>
-        <div class="iter-step">
-          <span class="iter-k">In use</span>
-          <h3>Watched how people used it</h3>
-          <p>With V1 on the wall, we <b>logged its issues</b> and noted how people actually used the terminal day to day. Its screen ran through the GPIO pins, so it was <b>slow and often froze</b>, and most users are older, so it had to be simpler to use.</p>
-        </div>
-        <div class="iter-arrow" aria-hidden="true"></div>
-        <div class="iter-step v2">
-          <span class="iter-k">V2</span>
-          <figure class="pair"><img class="zoom" src="assets/qr-v2-front.jpg" width="800" height="1200" alt="V2 terminal on the wall, from the front: the 5-inch display above a separate scan window with a green ring" loading="lazy"><img class="zoom" src="assets/qr-v2-angle.jpg" width="800" height="1200" alt="V2 terminal from the side: the printed housing and wall mount behind the display" loading="lazy"></figure>
-          <h3>Rebuilt to fix all of it</h3>
-          <ul>
-            <li>Official 5-inch Raspberry Pi display: larger, and off the GPIO pins</li>
-            <li>A clearly separate scan opening</li>
-            <li>An easier-to-read front</li>
-            <li>Simpler wall installation</li>
-            <li>Sturdier internal mounting</li>
-            <li>Quick to assemble and service</li>
-          </ul>
-          <p class="iter-foot">In use at the association every week.</p>
+        <div class="evo-table">
+          <div class="evo-head"><span>What the field demanded</span><span>V2 design response</span></div>
+          <ol>
+          <li><span class="evo-req">A display that stays responsive</span><p>V1’s screen ran over the GPIO pins and was slow and often froze. V2 uses the <b>official 5-inch Raspberry Pi Touch Display 2</b> on the Pi’s dedicated display connector, and it is larger.</p></li>
+          <li><span class="evo-req">Readable at a glance</span><p>Most users are older, so the terminal has to explain itself. A <b>larger screen and a cleaner, easier-to-read front</b> do that.</p></li>
+          <li><span class="evo-req">An unmistakable scan point</span><p>The GM60 sits in <b>its own scanner head</b> that projects forward at an angle below the display, so it is obvious where the phone goes.</p></li>
+          <li><span class="evo-req">Fast, clean installation</span><p>A <b>simplified wall mount</b>, with fewer steps to put the unit up.</p></li>
+          <li><span class="evo-req">Robust in weekly use</span><p><b>Sturdier internal mounting</b> that holds the display, scanner and Raspberry Pi firmly in place.</p></li>
+          <li><span class="evo-req">Easy to build and service</span><p>An enclosure that is <b>quick to assemble</b>, and just as quick to open for service.</p></li>
+          <li><span class="evo-req">Efficient to manufacture</span><p><b>Single-material FDM</b> in light grey PLA with print-efficient geometry. Concept features that could not be made well, such as lighting above the scanner and frosted glass, were cut.</p></li>
+          </ol>
         </div>
       </div>
 
       <div class="brief">
         <div class="card"><span class="label">Problem</span><p>An association needed a fixed QR check-in station: a scanner, a Raspberry Pi and a display in one compact unit on the wall, robust enough for weekly use.</p></div>
         <div class="card"><span class="label">My role</span><p>I designed and built the hardware: the SolidWorks enclosure and wall mount, the packaging of display, GM60 scanner and Raspberry Pi, printing, assembly and testing. The application software was handled separately.</p></div>
-        <div class="card result"><span class="label">Result</span><span class="big">V2, every week</span><p>V2 fixes the issues found on V1 in real use and is far cleaner. It is in use at the association every week.</p></div>
+        <div class="card result"><span class="label">Result</span><span class="big">V2, every week</span><p>V2 answers every issue found in V1’s field evaluation and is far cleaner. It is in service at the association every week.</p></div>
       </div>
 
       <div class="decisions">
@@ -265,8 +259,6 @@
         <ol>
           <li><b>Designed around the real parts.</b> The display, GM60 scanner and Raspberry Pi set the packaging. The CAD accounts for fasteners, clearances, cable routing and access for assembly.</li>
           <li><b>Print-ready.</b> Every housing part is designed for FDM printing and printed, assembled and tested on the real hardware.</li>
-          <li><b>Efficient to print, in one colour.</b> V2 is printed in the light grey PLA I had, so I kept the design efficient to print and dropped concept ideas I couldn’t make well, such as lighting above the scanner and a frosted glass front.</li>
-          <li><b>The scanner as its own part.</b> I finished the display housing first, then tried several ways to add the scanner below it. The final head sticks out forward at an angle as its own module, so the place to scan is clearly separate from the screen.</li>
         </ol>
       </div>
     </div>
