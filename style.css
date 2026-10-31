@@ -201,9 +201,6 @@ figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
 .demo h3 { margin: 0 0 8px; font-size: 24px; color: #fff; }
 .demo p { margin: 0 0 14px; color: #c5d6df; }
 .demo .btn { color: #fff; }
-/* the dashboard gets the full width under the video and its text, so the UI is readable */
-.demo > figure { grid-column: 1 / -1; margin: 8px 0 0; }
-.demo > figure img { width: 100%; height: auto; display: block; }
 
 .pending { display: grid; place-items: center; text-align: center; min-height: 280px; border-radius: var(--radius); border: 2px dashed var(--signal); color: var(--signal); background: #fff8f1; padding: 20px; }
 .todo { background: #fdeedd; color: #b5651d; padding: 0 4px; border-radius: 2px; }
@@ -373,7 +370,11 @@ dialog.lightbox p { color: #dfe9ee; text-align: center; margin: 10px 0 0; font-s
   .project-head { grid-template-columns: minmax(0, 1fr); }
   .project-head .num { grid-row: auto; font-size: 56px; }
   .demo { grid-template-columns: minmax(0, 1fr); }
-  .demo video { max-width: 320px; margin: 0 auto; display: block; }
+  .demo video { max-width: 420px; margin: 0 auto; display: block; }
+  /* phones: the dashboard runs edge to edge, so its UI is as large as the screen allows */
+  .demo figure { margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
+  .demo figure img { width: 100%; display: block; border-radius: 0 !important; }
+  .demo figcaption { padding: 0 16px; }
   footer .wrap { grid-template-columns: minmax(0, 1fr); }
   footer .cta { justify-content: flex-start; }
 }

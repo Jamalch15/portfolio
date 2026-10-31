@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#193747">
-<link rel="stylesheet" href="style.css?v=bf3e4c13">
+<link rel="stylesheet" href="style.css?v=03a72fc3">
 <script>document.documentElement.classList.add('js')</script>
 <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
 <script type="module" src="js/ares-scene.js?v=c7f63fe3"></script><script type="module" src="js/qdd-scene.js?v=07444eca"></script>
@@ -128,12 +128,12 @@
         <div>
           <h3>Vision, kinematics and a browser dashboard</h3>
           <p>The PC runs DH forward kinematics, Jacobian inverse kinematics, trajectory planning and camera-based colour detection; the ESP32-S3 drives the hardware. <b>Sorting is fully automatic:</b> the camera finds a brick, inverse kinematics plans the pick, the arm grips it and drops it in the bin for its colour, and the loop repeats until the table is clear, with no input from anyone. When you set up a new move by hand, the dashboard previews it as a ghost arm and path before it runs. The video shows a full sorting run.</p>
+          <figure>
+            <img class="zoom" src="assets/ares4-dashboard.jpg" width="2000" height="1125" alt="ARES-4 dashboard: Jacobian IK target and results, and the 3D viewport with the arm in its ready pose, a ghost arm at the pick target and the planned path" loading="lazy" style="border-radius:8px;cursor:zoom-in">
+            <figcaption>The dashboard, rendered from the project code in simulation mode: from its ready pose, the arm previews a pick on the table as a ghost arm with its planned path, before anything moves.</figcaption>
+          </figure>
           <p style="margin-top:16px"><a class="btn" href="https://github.com/Jamalch15/ARES-4">Source, firmware, KiCad and calculations on GitHub →</a></p>
         </div>
-        <figure>
-          <img class="zoom" src="assets/ares4-dashboard.jpg" width="2000" height="1125" alt="ARES-4 dashboard: Jacobian IK target and results, and the 3D viewport with the arm in its ready pose, a ghost arm at the pick target and the planned path" loading="lazy" style="border-radius:8px;cursor:zoom-in">
-          <figcaption>The dashboard, rendered from the project code in simulation mode: from its ready pose, the arm previews a pick on the table as a ghost arm with its planned path, before anything moves.</figcaption>
-        </figure>
       </div>
 
       <div class="gallery-wrap">
